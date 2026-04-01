@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Plus_Jakarta_Sans:wght@500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#b4c1ff",
+                        "background": "#f9f5ff",
+                        "on-primary-container": "#00146f",
+                        "error-container": "#f74b6d",
+                        "on-surface": "#2d2a51",
+                        "error": "#b41340",
+                        "on-primary-fixed": "#000000",
+                        "inverse-on-surface": "#9c98c6",
+                        "tertiary-fixed": "#dee5fd",
+                        "primary-dim": "#3646a5",
+                        "surface-bright": "#f9f5ff",
+                        "on-surface-variant": "#5a5781",
+                        "on-tertiary-fixed": "#394154",
+                        "surface-dim": "#d4cfff",
+                        "surface-container-low": "#f3eeff",
+                        "on-secondary-fixed": "#1f2f6e",
+                        "on-secondary-fixed-variant": "#3d4c8d",
+                        "on-primary": "#f3f1ff",
+                        "surface-variant": "#ddd9ff",
+                        "secondary-dim": "#3c4b8c",
+                        "on-tertiary-fixed-variant": "#565d71",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#8999fd",
+                        "on-secondary": "#f2f1ff",
+                        "tertiary-dim": "#484f63",
+                        "primary": "#4353b2",
+                        "surface": "#f9f5ff",
+                        "on-tertiary-container": "#4c5367",
+                        "on-primary-fixed-variant": "#071d81",
+                        "outline": "#75729e",
+                        "surface-container-highest": "#ddd9ff",
+                        "on-background": "#2d2a51",
+                        "surface-container": "#e9e5ff",
+                        "primary-fixed-dim": "#7c8cef",
+                        "tertiary-fixed-dim": "#d0d7ee",
+                        "secondary-container": "#c7cfff",
+                        "secondary": "#485798",
+                        "surface-container-high": "#e3dfff",
+                        "tertiary": "#545b6f",
+                        "primary-container": "#8999fd",
+                        "on-tertiary": "#f0f2ff",
+                        "on-error-container": "#510017",
+                        "on-error": "#ffefef",
+                        "surface-tint": "#4353b2",
+                        "inverse-surface": "#0b082f",
+                        "inverse-primary": "#8999fd",
+                        "outline-variant": "#aca8d7",
+                        "on-secondary-container": "#344383",
+                        "error-dim": "#a70138",
+                        "secondary-fixed": "#c7cfff",
+                        "tertiary-container": "#dee5fd"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Plus_Jakarta_Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 32px;
+            height: 32px;
+            background: #4353b2;
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(45, 42, 81, 0.15);
+        }
+
+        .slider-thumb::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+            background: #4353b2;
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(45, 42, 81, 0.15);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col items-center">
+    <!-- TopAppBar -->
+    <nav class="fixed top-0 w-full z-50 bg-[#f9f5ff] dark:bg-[#1a1a2e]">
+        <div class="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
+            <button
+                class="hover:bg-[#e9e5ff] dark:hover:bg-[#2d2a51] rounded-full transition-all p-2 active:scale-95 duration-200 text-[#4353b2] dark:text-[#8999fd]">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="font-['Manrope'] font-bold tracking-tight text-xl text-[#2d2a51] dark:text-[#e9e5ff]">Onboarding
+            </h1>
+            <div class="w-10"></div> <!-- Spacer for centering -->
+        </div>
+    </nav>
+    <!-- Main Canvas Content -->
+    <main class="flex-1 w-full max-w-md px-6 pt-24 pb-32 flex flex-col items-center">
+        <!-- Progress Section -->
+        <div class="w-full mb-12">
+            <div class="flex justify-between items-end mb-3">
+                <span class="font-label font-semibold text-sm text-on-surface-variant">Step 4 of 5</span>
+                <span class="font-label font-bold text-sm text-primary">80%</span>
+            </div>
+            <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                <div class="h-full w-[80%] bg-gradient-to-r from-primary to-inverse-primary rounded-full"></div>
+            </div>
+        </div>
+        <!-- Onboarding Card -->
+        <div
+            class="w-full bg-surface-container-lowest rounded-lg p-8 shadow-[0_10px_30px_rgba(45,42,81,0.06)] border border-outline-variant/10 text-center relative overflow-hidden">
+            <!-- Decorative background glow -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-secondary/5 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <h2 class="font-headline font-extrabold text-2xl tracking-tight text-on-surface mb-2">How many hours can
+                    you dedicate?</h2>
+                <p class="font-body text-on-surface-variant mb-12">Tell us your daily target for productive work.</p>
+                <!-- Value Display -->
+                <div class="flex flex-col items-center justify-center mb-10">
+                    <div class="relative">
+                        <span class="text-7xl font-headline font-extrabold text-primary tracking-tighter">4</span>
+                        <span class="text-xl font-headline font-bold text-on-surface-variant ml-1">hrs</span>
+                    </div>
+                </div>
+                <!-- Custom Slider -->
+                <div class="px-2 mb-8">
+                    <input
+                        class="w-full h-2 bg-surface-container-highest rounded-full appearance-none cursor-pointer slider-thumb"
+                        max="12" min="1" type="range" value="4" />
+                    <div class="flex justify-between mt-4 px-1 text-xs font-label font-semibold text-outline">
+                        <span>1 hr</span>
+                        <span>4 hrs</span>
+                        <span>8 hrs</span>
+                        <span>12 hrs</span>
+                    </div>
+                </div>
+                <!-- Contextual Hint -->
+                <div class="bg-surface-container-low rounded-xl p-4 flex items-start gap-3 text-left">
+                    <span class="material-symbols-outlined text-primary text-xl"
+                        style="font-variation-settings: 'FILL' 1;">info</span>
+                    <p class="text-sm font-body text-on-surface-variant leading-relaxed">Most high-performers find that
+                        <strong class="text-on-surface">4-6 hours</strong> of deep work is the ideal daily threshold for
+                        flow state.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Aesthetic Imagery -->
+        <div class="mt-12 w-full h-48 rounded-lg overflow-hidden relative">
+            <img alt="Calm workspace with natural light" class="w-full h-full object-cover grayscale-[20%] opacity-80"
+                data-alt="minimalist workspace with a clean desk, a single green plant, and soft morning sunlight streaming through a window creating a peaceful mood"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjUWGjbgXNdGym3EtIhB9T3w87RpBSlB4Hy7LUovdfY4Fn2vtBruiH5x-LQ-NY1ta87HgBTSP-ZSYXdLoHx8-L21ZnrvPiBEh48oKfe0YoKyN8sUB1XWVDXdd3fPQ6DiwIvdq-jRU90w90bdpeexAWxPbxI4Pp75p2SysSxU7atd99cki9YDP-IqjZOOVAEWXyEufSRhREt23VxiF54bDhvSo0T_Yf1P_kmJRrcJEa_qWR2_A5KYOBiXEeYGvVjr0heAM2MWkXe3A" />
+            <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <footer class="fixed bottom-0 w-full z-50 pb-8 px-6 bg-transparent">
+        <div class="flex justify-between items-center w-full max-w-md mx-auto">
+            <!-- Back Button -->
+            <button
+                class="text-[#5a5781] dark:text-[#aca8d7] font-['Plus_Jakarta_Sans'] font-medium px-6 py-4 hover:opacity-90 transition-opacity active:scale-98">
+                Back
+            </button>
+            <!-- Next Button -->
+            <button
+                class="bg-gradient-to-br from-[#4353b2] to-[#8999fd] text-white rounded-full px-10 py-4 shadow-lg shadow-[#2d2a51]/10 font-['Plus_Jakarta_Sans'] font-semibold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity active:scale-98">
+                Next
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+        </div>
+    </footer>
+</body>
+
+</html>
