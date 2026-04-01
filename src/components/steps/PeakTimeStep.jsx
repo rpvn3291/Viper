@@ -1,4 +1,4 @@
-import Layout from "../components/Layout";
+import Layout from "../Layout";
 
 const options = [
     { label: "Morning", id: "morning", icon: "wb_sunny", desc: "First light focus (6AM - 11AM)" },
@@ -9,15 +9,17 @@ const options = [
 export default function PeakTimeStep({ form, setForm, next, back }) {
     return (
         <Layout step={2} onNext={next} onBack={back}>
-            <div className="mb-8">
-                <h2 className="text-3xl font-headline font-extrabold leading-tight tracking-tight text-on-surface mb-3">
+            {/* Hero Content */}
+            <div className="mb-10">
+                <h2 className="font-headline text-[2.75rem] leading-[1.1] font-extrabold tracking-tight text-on-surface mb-3">
                     When are you most productive?
                 </h2>
-                <p className="text-on-surface-variant text-sm leading-relaxed font-medium">
+                <p className="text-on-surface-variant text-lg leading-relaxed font-medium">
                     Help us schedule your deep work sessions at times that match your natural energy.
                 </p>
             </div>
-            
+
+            {/* Selection Grid */}
             <div className="space-y-4">
                 {options.map((opt) => {
                     const isSelected = form?.peakTime === opt.id;
@@ -28,20 +30,20 @@ export default function PeakTimeStep({ form, setForm, next, back }) {
                                 e.preventDefault();
                                 setForm({ ...form, peakTime: opt.id });
                             }}
-                            className={`w-full text-left bg-surface-container-lowest rounded-lg p-4 border transition-all duration-200 group active:scale-[0.98] ${
+                            className={`w-full text-left bg-surface-container-lowest rounded-lg p-6 border transition-all duration-200 group active:scale-[0.98] ${
                                 isSelected 
-                                ? "border-outline-variant/20 shadow-[0_10px_30px_rgba(45,42,81,0.06)] ring-2 ring-primary ring-offset-2 ring-offset-background" 
+                                ? "border-outline-variant/20 shadow-[0_10px_30px_rgba(45,42,81,0.06)] ring-2 ring-primary ring-offset-4 ring-offset-background" 
                                 : "border-outline-variant/10 hover:border-outline-variant/30"
                             }`}
                         >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center transition-colors ${
+                            <div className="flex items-center gap-5">
+                                <div className={`w-16 h-16 flex-shrink-0 rounded-full flex items-center justify-center transition-colors ${
                                     isSelected 
                                     ? "bg-primary-container/20" 
                                     : "bg-surface-container group-hover:bg-secondary-container/30"
                                 }`}>
                                     <span 
-                                        className={`material-symbols-outlined text-2xl transition-colors ${
+                                        className={`material-symbols-outlined text-3xl transition-colors ${
                                             isSelected 
                                             ? "text-primary" 
                                             : "text-on-surface-variant group-hover:text-secondary"
@@ -52,8 +54,8 @@ export default function PeakTimeStep({ form, setForm, next, back }) {
                                     </span>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-headline font-bold text-lg text-on-surface">{opt.label}</h3>
-                                    <p className="font-label text-xs text-on-surface-variant mt-1">{opt.desc}</p>
+                                    <h3 className="font-headline font-bold text-xl text-on-surface">{opt.label}</h3>
+                                    <p className="font-label text-sm text-on-surface-variant mt-1">{opt.desc}</p>
                                 </div>
                                 {isSelected && (
                                     <div className="ml-auto">
@@ -65,8 +67,10 @@ export default function PeakTimeStep({ form, setForm, next, back }) {
                     );
                 })}
             </div>
-            <div className="mt-8 opacity-40">
-                <div className="w-full h-32 rounded-lg overflow-hidden relative">
+
+            {/* Decorative Element */}
+            <div className="mt-12 opacity-40">
+                <div className="w-full h-48 rounded-lg overflow-hidden relative">
                     <img 
                         alt="Desk setup" 
                         className="w-full h-full object-cover grayscale"

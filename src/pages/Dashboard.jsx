@@ -1,71 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { db } from '../firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { format } from 'date-fns';
-import { useNavigate, useLocation } from 'react-router-dom';
-import CalendarGrid from '../components/CalendarGrid';
-import { ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { isBefore, startOfToday, parseISO, isValid } from "date-fns";
 
 const Dashboard = () => {
-  const { currentUser, logOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
 
-  // Default to the date passed from TasksPage, or today
-  const [selectedDate, setSelectedDate] = useState(
-    location.state?.date || format(new Date(), 'yyyy-MM-dd')
-  );
+    const [missedTasks, setMissedTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  const [schedule, setSchedule] = useState([]);
+    useEffect(() => {
+        if (!currentUser) return;
 
-  useEffect(() => {
-    if (!currentUser) return;
+        const fetchMissedTasks = async () => {
+            try {
+                setLoading(true);
 
-    // Listen to the selected date's schedule
-    const unsubscribeSchedule = onSnapshot(doc(db, 'users', currentUser.uid, 'schedule', selectedDate), (docSnap) => {
-      if (docSnap.exists()) {
-        setSchedule(docSnap.data().items || []);
-      } else {
-        setSchedule([]); // clear if no schedule exists
-      }
-    });
+                const snapshot = await getDocs(
+                    collection(db, "users", currentUser.uid, "schedule")
+                );
 
-    return () => unsubscribeSchedule();
-  }, [currentUser, selectedDate]);
+                const today = startOfToday();
+                let missed = [];
 
-  return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans relative">
-      {/* Small floating header */}
-      <div className="absolute top-4 left-6 flex items-center gap-4 z-50">
-        <button
-          onClick={() => navigate('/tasks')}
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-slate-200 transition"
-        >
-          <ArrowLeft className="w-4 h-4" /> Tasks
-        </button>
+                snapshot.forEach((docSnap) => {
+                    // ✅ safer date parsing (important fix)
+                    const date = parseISO(docSnap.id);
 
-        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-slate-200">
-          <CalendarIcon className="w-4 h-4 text-primary-500" />
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm font-semibold text-slate-700 cursor-pointer"
-          />
+                    if (!isValid(date)) return; // skip invalid docs
+
+                    const items = docSnap.data().items || [];
+
+                    if (isBefore(date, today)) {
+                        const incomplete = items.filter((t) => !t.completed);
+                        missed.push(...incomplete);
+                    }
+                });
+
+                setMissedTasks(missed);
+            } catch (err) {
+                console.error("Error fetching missed tasks:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMissedTasks();
+    }, [currentUser]);
+
+    return (
+        <div className="p-6 bg-slate-50 min-h-screen">
+            {/* 🔹 Header */}
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">
+                Overview of your productivity
+            </p>
+
+            {/* 🔹 Questionnaire Section */}
+            <div className="mt-6 bg-white p-5 rounded-xl shadow">
+                <h2 className="font-semibold text-lg">Your Preferences</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                    Modify your AI planner setup anytime
+                </p>
+
+                <button
+                    onClick={() => navigate("/setup", { state: { edit: true } })} // ✅ FIXED
+                    className="mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition"
+                >
+                    Edit Questionnaire
+                </button>
+            </div>
+
+            {/* 🔹 Missed Tasks */}
+            <div className="mt-6 bg-white p-5 rounded-xl shadow">
+                <h2 className="font-semibold text-lg">Missed Tasks</h2>
+
+                {loading ? (
+                    <p className="mt-2 text-gray-500">Loading...</p>
+                ) : missedTasks.length === 0 ? (
+                    <p className="mt-2 text-green-600 font-medium">
+                        No missed tasks 🎉
+                    </p>
+                ) : (
+                    <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                        {missedTasks.map((task, i) => (
+                            <div
+                                key={i}
+                                className="bg-red-100 px-3 py-2 rounded-lg text-sm flex justify-between items-center"
+                            >
+                                <span>{task.title}</span>
+                                <span className="text-xs text-red-600">
+                                    Missed
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* 🔹 Navigation */}
+            <div className="mt-6 flex gap-3 flex-wrap">
+                <button
+                    onClick={() => navigate("/tasks")}
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition"
+                >
+                    Go to Tasks
+                </button>
+
+                <button
+                    onClick={() => navigate("/calendar")}
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition"
+                >
+                    View Calendar
+                </button>
+            </div>
         </div>
-      </div>
-
-      {/* CalendarGrid handles the UI */}
-      <CalendarGrid
-        schedule={schedule}
-        onGenerate={() => navigate('/tasks')}
-        loading={false}
-        logOut={logOut}
-        selectedDate={selectedDate}
-      />
-    </div>
-  );
+    );
 };
 
 export default Dashboard;

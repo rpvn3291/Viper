@@ -1,55 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { Save, Clock, Brain } from 'lucide-react';
+import StartTimeStep from "../components/steps/StartTimeStep";
+import PeakTimeStep from "../components/steps/PeakTimeStep";
+import PreferenceStep from "../components/steps/PreferenceStep";
+import AvailableHoursStep from "../components/steps/AvailableHoursStep";
+import BlockedTimeStep from "../components/steps/BlockedTimeStep";
 
 const Questionnaire = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
+  const isEditMode = location.state?.edit;
+
+  const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     startTime: 9,
     peakTime: 'morning',
     preference: 'hard-first',
     availableHours: 6,
-    blockedTimeStart: 10,
-    blockedTimeEnd: 17,
-    workStyle: 'deep-work',
-    chronotype: 'early-bird',
-    hobbies: '',
-    dislikes: ''
+    blockedTime: {
+      start: 22,
+      end: 7
+    }
   });
 
   useEffect(() => {
-    // Check if profile already exists
-    const checkProfile = async () => {
+    const fetchProfile = async () => {
       try {
         const docRef = doc(db, 'users', currentUser.uid, 'profile', 'config');
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
-          // If already filled out, go straight to dashboard
-          navigate('/tasks');
-        } else {
-          setLoading(false);
+          const data = docSnap.data();
+
+          setFormData({
+            startTime: data.startTime || 9,
+            peakTime: data.peakTime || 'morning',
+            preference: data.preference || 'hard-first',
+            availableHours: data.availableHours || 6,
+            blockedTime: {
+              start: data.blockedTime?.start ?? 22,
+              end: data.blockedTime?.end ?? 7
+            }
+          });
+
+          if (!isEditMode) {
+            navigate('/dashboard');
+            return;
+          }
         }
+
+        setLoading(false);
       } catch (err) {
-        console.error("Error checking profile:", err);
+        console.error("Error loading profile:", err);
         setLoading(false);
       }
     };
-    checkProfile();
-  }, [currentUser, navigate]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    fetchProfile();
+  }, [currentUser, isEditMode, navigate]);
 
+  const nextStep = () => setStep(prev => prev + 1);
+  const prevStep = () => setStep(prev => prev - 1);
+  
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+
     try {
       const payload = {
         startTime: Number(formData.startTime),
@@ -57,136 +78,73 @@ const Questionnaire = () => {
         preference: formData.preference,
         availableHours: Number(formData.availableHours),
         blockedTime: {
-          start: Number(formData.blockedTimeStart),
-          end: Number(formData.blockedTimeEnd)
-        },
-        workStyle: formData.workStyle,
-        chronotype: formData.chronotype,
-        hobbies: formData.hobbies,
-        dislikes: formData.dislikes
+          start: Number(formData.blockedTime.start),
+          end: Number(formData.blockedTime.end)
+        }
       };
 
       await setDoc(doc(db, 'users', currentUser.uid, 'profile', 'config'), payload);
+
       navigate('/dashboard');
     } catch (err) {
       console.error("Error saving profile", err);
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>;
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <div className="bg-white max-w-xl w-full rounded-3xl shadow-xl overflow-hidden animate-fade-in-up">
-        <div className="bg-primary-600 p-8 text-white text-center">
-          <Brain className="w-12 h-12 mx-auto mb-4 text-primary-200" />
-          <h2 className="text-3xl font-bold">Configure Your AI Worker</h2>
-          <p className="text-primary-100 mt-2">Let's personalize your schedule engine.</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary-500" /> Day Start Time
-              </label>
-              <select name="startTime" value={formData.startTime} onChange={handleChange} className="w-full p-3 bg-slate-100 border border-transparent focus:border-primary-500 rounded-xl outline-none transition">
-                {[...Array(24)].map((_, i) => (
-                  <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary-500" /> Available Hours/Day
-              </label>
-              <input type="number" name="availableHours" min="1" max="24" value={formData.availableHours} onChange={handleChange} className="w-full p-3 bg-slate-100 border border-transparent focus:border-primary-500 rounded-xl outline-none" required />
-            </div>
-          </div>
-
-          <div className="space-y-4 pt-4 border-t border-slate-100">
-            <h3 className="font-bold text-slate-800">Your Workflow</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Peak Productivity</label>
-                <select name="peakTime" value={formData.peakTime} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
-                  <option value="morning">Morning</option>
-                  <option value="afternoon">Afternoon</option>
-                  <option value="night">Night</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Task Preference</label>
-                <select name="preference" value={formData.preference} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
-                  <option value="hard-first">Hard Tasks First</option>
-                  <option value="easy-first">Easy Tasks First</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 pt-4 border-t border-slate-100">
-            <h3 className="font-bold text-slate-800">Fixed Blocked Time (e.g. Work/College)</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Block Start</label>
-                <select name="blockedTimeStart" value={formData.blockedTimeStart} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
-                  {[...Array(24)].map((_, i) => (
-                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Block End</label>
-                <select name="blockedTimeEnd" value={formData.blockedTimeEnd} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
-                  {[...Array(24)].map((_, i) => (
-                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 pt-4 border-t border-slate-100">
-            <h3 className="font-bold text-slate-800">Advanced Personalization</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Work Style</label>
-                <select name="workStyle" value={formData.workStyle} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
-                  <option value="deep-work">Deep Work (Long Blocks)</option>
-                  <option value="pomodoro">Pomodoro (Frequent Breaks)</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Chronotype</label>
-                <select name="chronotype" value={formData.chronotype} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
-                  <option value="early-bird">Early Bird (Morning Heavy)</option>
-                  <option value="mid-day">Mid-Day Regular</option>
-                  <option value="night-owl">Night Owl (Late Night Heavy)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-2 mt-4">
-              <label className="text-sm font-semibold text-slate-700">Core Interests & Hobbies</label>
-              <input type="text" name="hobbies" value={formData.hobbies} onChange={handleChange} placeholder="e.g. Gaming, Reading, Swimming" className="w-full p-3 bg-slate-100 border border-transparent focus:border-primary-500 rounded-xl outline-none" />
-            </div>
-
-            <div className="space-y-2 mt-4">
-              <label className="text-sm font-semibold text-slate-700">What Tasks Do You Avoid Most?</label>
-              <input type="text" name="dislikes" value={formData.dislikes} onChange={handleChange} placeholder="e.g. Cleaning, Emails, Documentation" className="w-full p-3 bg-slate-100 border border-transparent focus:border-primary-500 rounded-xl outline-none" />
-            </div>
-          </div>
-
-          <button type="submit" className="w-full mt-6 flex justify-center items-center gap-2 bg-primary-600 text-white font-bold py-4 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/30">
-            <Save className="w-5 h-5" />
-            Save & Continue to Tasks
-          </button>
-        </form>
-      </div>
+  if (loading) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-on-surface-variant">Loading...</div>
     </div>
+  );
+
+  // Render the current step component directly - they now include their own Layout
+  return (
+    <>
+      {step === 1 && (
+        <StartTimeStep
+          form={formData}
+          setForm={setFormData}
+          next={nextStep}
+          back={null}
+        />
+      )}
+
+      {step === 2 && (
+        <PeakTimeStep
+          form={formData}
+          setForm={setFormData}
+          next={nextStep}
+          back={prevStep}
+        />
+      )}
+
+      {step === 3 && (
+        <PreferenceStep
+          form={formData}
+          setForm={setFormData}
+          next={nextStep}
+          back={prevStep}
+        />
+      )}
+
+      {step === 4 && (
+        <AvailableHoursStep
+          form={formData}
+          setForm={setFormData}
+          next={nextStep}
+          back={prevStep}
+        />
+      )}
+
+      {step === 5 && (
+        <BlockedTimeStep
+          form={formData}
+          setForm={setFormData}
+          next={handleSubmit}
+          back={prevStep}
+        />
+      )}
+    </>
   );
 };
 
