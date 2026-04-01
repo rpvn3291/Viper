@@ -9,7 +9,7 @@ const Questionnaire = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  
+
   const [formData, setFormData] = useState({
     startTime: 9,
     peakTime: 'morning',
@@ -57,7 +57,7 @@ const Questionnaire = () => {
           end: Number(formData.blockedTimeEnd)
         }
       };
-      
+
       await setDoc(doc(db, 'users', currentUser.uid, 'profile', 'config'), payload);
       navigate('/dashboard');
     } catch (err) {
@@ -75,7 +75,7 @@ const Questionnaire = () => {
           <h2 className="text-3xl font-bold">Configure Your AI Worker</h2>
           <p className="text-primary-100 mt-2">Let's personalize your schedule engine.</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -84,11 +84,11 @@ const Questionnaire = () => {
               </label>
               <select name="startTime" value={formData.startTime} onChange={handleChange} className="w-full p-3 bg-slate-100 border border-transparent focus:border-primary-500 rounded-xl outline-none transition">
                 {[...Array(24)].map((_, i) => (
-                  <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
+                  <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
                 ))}
               </select>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary-500" /> Available Hours/Day
@@ -125,7 +125,7 @@ const Questionnaire = () => {
                 <label className="text-sm font-semibold text-slate-700">Block Start</label>
                 <select name="blockedTimeStart" value={formData.blockedTimeStart} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
                   {[...Array(24)].map((_, i) => (
-                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
+                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
                   ))}
                 </select>
               </div>
@@ -133,7 +133,7 @@ const Questionnaire = () => {
                 <label className="text-sm font-semibold text-slate-700">Block End</label>
                 <select name="blockedTimeEnd" value={formData.blockedTimeEnd} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
                   {[...Array(24)].map((_, i) => (
-                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
+                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
                   ))}
                 </select>
               </div>

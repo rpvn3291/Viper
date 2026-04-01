@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#b4c1ff",
+                        "background": "#f9f5ff",
+                        "on-primary-container": "#00146f",
+                        "error-container": "#f74b6d",
+                        "on-surface": "#2d2a51",
+                        "error": "#b41340",
+                        "on-primary-fixed": "#000000",
+                        "inverse-on-surface": "#9c98c6",
+                        "tertiary-fixed": "#dee5fd",
+                        "primary-dim": "#3646a5",
+                        "surface-bright": "#f9f5ff",
+                        "on-surface-variant": "#5a5781",
+                        "on-tertiary-fixed": "#394154",
+                        "surface-dim": "#d4cfff",
+                        "surface-container-low": "#f3eeff",
+                        "on-secondary-fixed": "#1f2f6e",
+                        "on-secondary-fixed-variant": "#3d4c8d",
+                        "on-primary": "#f3f1ff",
+                        "surface-variant": "#ddd9ff",
+                        "secondary-dim": "#3c4b8c",
+                        "on-tertiary-fixed-variant": "#565d71",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#8999fd",
+                        "on-secondary": "#f2f1ff",
+                        "tertiary-dim": "#484f63",
+                        "primary": "#4353b2",
+                        "surface": "#f9f5ff",
+                        "on-tertiary-container": "#4c5367",
+                        "on-primary-fixed-variant": "#071d81",
+                        "outline": "#75729e",
+                        "surface-container-highest": "#ddd9ff",
+                        "on-background": "#2d2a51",
+                        "surface-container": "#e9e5ff",
+                        "primary-fixed-dim": "#7c8cef",
+                        "tertiary-fixed-dim": "#d0d7ee",
+                        "secondary-container": "#c7cfff",
+                        "secondary": "#485798",
+                        "surface-container-high": "#e3dfff",
+                        "tertiary": "#545b6f",
+                        "primary-container": "#8999fd",
+                        "on-tertiary": "#f0f2ff",
+                        "on-error-container": "#510017",
+                        "on-error": "#ffefef",
+                        "surface-tint": "#4353b2",
+                        "inverse-surface": "#0b082f",
+                        "inverse-primary": "#8999fd",
+                        "outline-variant": "#aca8d7",
+                        "on-secondary-container": "#344383",
+                        "error-dim": "#a70138",
+                        "secondary-fixed": "#c7cfff",
+                        "tertiary-container": "#dee5fd"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .bg-ethereal-gradient {
+            background: linear-gradient(135deg, #f9f5ff 0%, #f3eeff 100%);
+        }
+
+        .ambient-glow {
+            box-shadow: 0 10px 30px rgba(45, 42, 81, 0.06);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-surface font-body min-h-screen flex flex-col">
+    <!-- TopAppBar Shared Component -->
+    <header class="fixed top-0 w-full z-50 bg-[#f9f5ff] dark:bg-[#1a1a2e]">
+        <div class="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
+            <div class="flex items-center gap-4">
+                <button
+                    class="hover:bg-[#e9e5ff] dark:hover:bg-[#2d2a51] rounded-full transition-all p-2 Active: scale-95 duration-200">
+                    <span class="material-symbols-outlined text-[#4353b2] dark:text-[#8999fd]">arrow_back</span>
+                </button>
+                <h1 class="font-['Manrope'] font-bold tracking-tight text-xl text-[#2d2a51] dark:text-[#e9e5ff]">
+                    Onboarding</h1>
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="text-xs font-label font-semibold text-on-surface-variant uppercase tracking-wider">Step 5
+                    of 5</span>
+            </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-surface-container-highest h-[0.7rem]">
+            <div
+                class="bg-gradient-to-r from-primary to-inverse-primary h-full w-full rounded-r-full transition-all duration-1000">
+            </div>
+        </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="flex-grow flex flex-col items-center justify-center px-6 pt-24 pb-32 max-w-md mx-auto w-full">
+        <!-- Animated Background Decor -->
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+            <div class="absolute top-1/4 -left-20 w-64 h-64 bg-primary-container/20 blur-[100px] rounded-full"></div>
+            <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-secondary-container/20 blur-[120px] rounded-full">
+            </div>
+        </div>
+        <div class="w-full space-y-8">
+            <!-- Header Text Section -->
+            <div class="space-y-3 px-2">
+                <h2 class="text-display-md text-4xl font-extrabold tracking-tight text-on-surface leading-tight">
+                    Set your unavailable time
+                </h2>
+                <p class="text-on-surface-variant text-lg font-medium leading-relaxed">
+                    When are you definitely off the clock? We'll protect this window from all interruptions.
+                </p>
+            </div>
+            <!-- Onboarding Card: Blocked Time -->
+            <div
+                class="bg-surface-container-lowest p-8 rounded-lg ambient-glow border border-outline-variant/10 space-y-10">
+                <div class="flex justify-center">
+                    <div class="relative w-24 h-24 bg-surface-container rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl text-primary"
+                            style="font-variation-settings: 'FILL' 1;">bedtime</span>
+                        <div
+                            class="absolute -top-1 -right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                            <span class="material-symbols-outlined text-white text-sm"
+                                style="font-variation-settings: 'FILL' 1;">lock</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <!-- Start Time Input -->
+                    <div class="space-y-2 group">
+                        <label class="block text-sm font-label font-bold text-on-surface-variant/80 ml-1">Start
+                            time</label>
+                        <div class="relative">
+                            <input
+                                class="w-full bg-transparent border-b border-outline-variant/20 py-4 px-1 text-2xl font-semibold text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container/30 transition-all rounded-t-lg"
+                                placeholder="--:--" type="text" value="18:00" />
+                            <span
+                                class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/40">schedule</span>
+                        </div>
+                    </div>
+                    <!-- End Time Input -->
+                    <div class="space-y-2 group">
+                        <label class="block text-sm font-label font-bold text-on-surface-variant/80 ml-1">End
+                            time</label>
+                        <div class="relative">
+                            <input
+                                class="w-full bg-transparent border-b border-outline-variant/20 py-4 px-1 text-2xl font-semibold text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container/30 transition-all rounded-t-lg"
+                                placeholder="--:--" type="text" value="07:00" />
+                            <span
+                                class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/40">wb_sunny</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Instructional Tip -->
+                <div class="bg-surface-container-low p-4 rounded-xl flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
+                    <p class="text-sm text-on-surface-variant leading-snug">
+                        Your AI assistant will automatically decline meetings and silence notifications during this
+                        period.
+                    </p>
+                </div>
+            </div>
+            <!-- Decorative Image Element -->
+            <div class="relative w-full aspect-video rounded-lg overflow-hidden shadow-sm">
+                <img alt="Atmospheric sunset over a calm ocean"
+                    class="w-full h-full object-cover grayscale-[20%] opacity-90"
+                    data-alt="Soft ethereal sunset over a calm ocean with purple and blue gradients and wispy clouds in a minimalist aesthetic"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVRetC3jTxCQCmhIknrFBeT_DOn4cY4acrwLKPBZ2DaId1VAPYf55VLgzVybKiHXMXViZkK-sZHng1Yv-fbsGjimZc0icyyLdtS6P3CylscBlilw6QDqGl5x_T4d8KMzubus2VckCNJmeo05SJtTG493gitfRvXa3BF1GM7uMwAkGUCjyTv0UfLrQxdKmETjXav_X0TeOIdP1_Y7N3QU_EiO6Rltj2y6rT-7ctlhsxBWp83A0HCLf7jW2v-pw4Q5xYW4RPn7bLKlU" />
+                <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar Shared Component -->
+    <footer class="fixed bottom-0 w-full z-50 pb-8 px-6 bg-transparent">
+        <div class="flex justify-between items-center w-full max-w-md mx-auto">
+            <!-- Back Button (Inactive Navigation) -->
+            <button
+                class="text-[#5a5781] dark:text-[#aca8d7] font-['Plus_Jakarta_Sans'] font-medium px-6 py-4 hover:opacity-90 transition-opacity active:scale-98">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                    <span>Back</span>
+                </div>
+            </button>
+            <!-- Get Started Button (Active Navigation) -->
+            <button
+                class="bg-gradient-to-br from-[#4353b2] to-[#8999fd] text-white font-['Plus_Jakarta_Sans'] font-semibold text-sm rounded-full px-10 py-4 shadow-lg shadow-[#2d2a51]/10 hover:opacity-90 transition-opacity active:scale-98">
+                <div class="flex items-center gap-2">
+                    <span>Get Started</span>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </div>
+            </button>
+        </div>
+    </footer>
+</body>
+
+</html>

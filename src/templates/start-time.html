@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#4353b2",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#c7cfff",
+                        "on-error": "#ffefef",
+                        "error-container": "#f74b6d",
+                        "secondary-dim": "#3c4b8c",
+                        "primary": "#4353b2",
+                        "on-primary": "#f3f1ff",
+                        "error-dim": "#a70138",
+                        "on-tertiary-container": "#4c5367",
+                        "on-tertiary": "#f0f2ff",
+                        "surface-bright": "#f9f5ff",
+                        "tertiary-dim": "#484f63",
+                        "inverse-primary": "#8999fd",
+                        "secondary-fixed-dim": "#b4c1ff",
+                        "surface": "#f9f5ff",
+                        "error": "#b41340",
+                        "outline-variant": "#aca8d7",
+                        "primary-fixed-dim": "#7c8cef",
+                        "on-tertiary-fixed-variant": "#565d71",
+                        "on-secondary-fixed": "#1f2f6e",
+                        "on-error-container": "#510017",
+                        "on-secondary-container": "#344383",
+                        "on-primary-fixed": "#000000",
+                        "secondary-fixed": "#c7cfff",
+                        "tertiary-fixed-dim": "#d0d7ee",
+                        "inverse-on-surface": "#9c98c6",
+                        "on-secondary": "#f2f1ff",
+                        "inverse-surface": "#0b082f",
+                        "tertiary": "#545b6f",
+                        "surface-container-high": "#e3dfff",
+                        "on-background": "#2d2a51",
+                        "surface-dim": "#d4cfff",
+                        "tertiary-container": "#dee5fd",
+                        "on-surface-variant": "#5a5781",
+                        "primary-dim": "#3646a5",
+                        "secondary": "#485798",
+                        "surface-container-highest": "#ddd9ff",
+                        "on-primary-container": "#00146f",
+                        "on-secondary-fixed-variant": "#3d4c8d",
+                        "on-tertiary-fixed": "#394154",
+                        "outline": "#75729e",
+                        "primary-fixed": "#8999fd",
+                        "primary-container": "#8999fd",
+                        "surface-variant": "#ddd9ff",
+                        "on-surface": "#2d2a51",
+                        "surface-container": "#e9e5ff",
+                        "surface-container-low": "#f3eeff",
+                        "on-primary-fixed-variant": "#071d81",
+                        "background": "#f9f5ff",
+                        "tertiary-fixed": "#dee5fd"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .ambient-glow {
+            box-shadow: 0 10px 30px rgba(45, 42, 81, 0.06);
+        }
+
+        .time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: #4353b2;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(67, 83, 178, 0.3);
+        }
+
+        .time-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: #4353b2;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(67, 83, 178, 0.3);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-surface font-body text-on-surface flex items-center justify-center min-h-screen p-4">
+    <!-- Main Onboarding Container (Centered Mobile Card) -->
+    <div
+        class="w-full max-w-md bg-surface-container-low rounded-lg overflow-hidden ambient-glow border border-outline-variant/10">
+        <!-- Header Section (Minimalist focused view as per Hierarchy of Focus) -->
+        <div class="px-8 pt-8 pb-4">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-10 h-10 flex items-center justify-center text-outline opacity-20">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </div>
+                <h2 class="font-headline font-bold text-lg text-on-surface tracking-tight">Onboarding</h2>
+                <div class="w-10"></div> <!-- Spacer for symmetry -->
+            </div>
+            <!-- Progress Tracking -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-end">
+                    <span class="font-label text-sm font-semibold text-primary">Step 1 of 5</span>
+                    <span class="font-label text-xs text-on-surface-variant uppercase tracking-widest">20%
+                        Complete</span>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full">
+                    <div class="h-full w-1/5 bg-gradient-to-r from-primary to-inverse-primary rounded-full"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Content Section -->
+        <div class="px-10 py-10 text-center">
+            <div class="mb-8">
+                <h1
+                    class="font-headline text-[2.25rem] font-extrabold leading-tight tracking-tight text-on-surface mb-4">
+                    What time do you usually start your day?
+                </h1>
+                <p class="font-body text-on-surface-variant text-base leading-relaxed max-w-[280px] mx-auto">
+                    We'll tailor your peak focus hours to your unique routine.
+                </p>
+            </div>
+            <!-- Time Display Card -->
+            <div
+                class="relative bg-surface-container-lowest rounded-lg p-10 mb-10 ambient-glow border border-outline-variant/5">
+                <div class="flex flex-col items-center">
+                    <span
+                        class="font-label text-[0.7rem] font-bold text-primary uppercase tracking-[0.2em] mb-2">Morning
+                        Routine</span>
+                    <div class="font-headline text-6xl font-extrabold text-on-surface flex items-baseline gap-1">
+                        07<span class="text-primary-dim opacity-40">:</span>00
+                    </div>
+                    <div class="mt-8 w-full px-2">
+                        <input
+                            class="time-slider w-full h-2 bg-surface-container-highest rounded-full appearance-none cursor-pointer"
+                            max="1440" min="0" type="range" value="420" />
+                        <div class="flex justify-between mt-4 px-1">
+                            <span class="font-label text-[10px] font-semibold text-on-surface-variant/50">12:00
+                                AM</span>
+                            <span class="font-label text-[10px] font-semibold text-on-surface-variant/50">11:59
+                                PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tips / Contextual Info -->
+            <div class="flex items-center justify-center gap-2 text-on-surface-variant/70 mb-2">
+                <span class="material-symbols-outlined text-sm"
+                    style="font-variation-settings: 'FILL' 1;">light_mode</span>
+                <span class="font-label text-xs font-medium italic">Early birds often peak before noon</span>
+            </div>
+        </div>
+        <!-- Footer Controls -->
+        <div class="px-8 pb-10 flex flex-col items-center">
+            <button
+                class="w-full py-5 px-10 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-bold text-lg rounded-xl ambient-glow hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                Next Step
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+            <button class="mt-6 font-label text-sm font-semibold text-on-surface-variant/40 cursor-not-allowed"
+                disabled="">
+                I'll set this later
+            </button>
+        </div>
+    </div>
+    <!-- Atmospheric Background Elements -->
+    <div class="fixed inset-0 -z-10 bg-surface pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary-container/10 blur-[150px]">
+        </div>
+    </div>
+</body>
+
+</html>

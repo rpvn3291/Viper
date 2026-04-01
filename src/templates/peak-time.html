@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Onboarding - Peak Productivity</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Plus_Jakarta_Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#b4c1ff",
+                        "background": "#f9f5ff",
+                        "on-primary-container": "#00146f",
+                        "error-container": "#f74b6d",
+                        "on-surface": "#2d2a51",
+                        "error": "#b41340",
+                        "on-primary-fixed": "#000000",
+                        "inverse-on-surface": "#9c98c6",
+                        "tertiary-fixed": "#dee5fd",
+                        "primary-dim": "#3646a5",
+                        "surface-bright": "#f9f5ff",
+                        "on-surface-variant": "#5a5781",
+                        "on-tertiary-fixed": "#394154",
+                        "surface-dim": "#d4cfff",
+                        "surface-container-low": "#f3eeff",
+                        "on-secondary-fixed": "#1f2f6e",
+                        "on-secondary-fixed-variant": "#3d4c8d",
+                        "on-primary": "#f3f1ff",
+                        "surface-variant": "#ddd9ff",
+                        "secondary-dim": "#3c4b8c",
+                        "on-tertiary-fixed-variant": "#565d71",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#8999fd",
+                        "on-secondary": "#f2f1ff",
+                        "tertiary-dim": "#484f63",
+                        "primary": "#4353b2",
+                        "surface": "#f9f5ff",
+                        "on-tertiary-container": "#4c5367",
+                        "on-primary-fixed-variant": "#071d81",
+                        "outline": "#75729e",
+                        "surface-container-highest": "#ddd9ff",
+                        "on-background": "#2d2a51",
+                        "surface-container": "#e9e5ff",
+                        "primary-fixed-dim": "#7c8cef",
+                        "tertiary-fixed-dim": "#d0d7ee",
+                        "secondary-container": "#c7cfff",
+                        "secondary": "#485798",
+                        "surface-container-high": "#e3dfff",
+                        "tertiary": "#545b6f",
+                        "primary-container": "#8999fd",
+                        "on-tertiary": "#f0f2ff",
+                        "on-error-container": "#510017",
+                        "on-error": "#ffefef",
+                        "surface-tint": "#4353b2",
+                        "inverse-surface": "#0b082f",
+                        "inverse-primary": "#8999fd",
+                        "outline-variant": "#aca8d7",
+                        "on-secondary-container": "#344383",
+                        "error-dim": "#a70138",
+                        "secondary-fixed": "#c7cfff",
+                        "tertiary-container": "#dee5fd"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .atmospheric-depth {
+            background: linear-gradient(135deg, #f9f5ff 0%, #f3eeff 100%);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background font-body text-on-surface min-h-screen flex flex-col items-center overflow-x-hidden atmospheric-depth">
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-[#f9f5ff] dark:bg-[#1a1a2e]">
+        <div class="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
+            <div class="flex items-center gap-2">
+                <div
+                    class="hover:bg-[#e9e5ff] dark:hover:bg-[#2d2a51] rounded-full transition-all p-2 cursor-pointer active:scale-95 duration-200">
+                    <span class="material-symbols-outlined text-[#4353b2] dark:text-[#8999fd]">arrow_back</span>
+                </div>
+            </div>
+            <h1 class="font-['Manrope'] font-bold tracking-tight text-xl text-[#2d2a51] dark:text-[#e9e5ff]">Onboarding
+            </h1>
+            <div class="w-10"></div> <!-- Spacer for center alignment -->
+        </div>
+    </header>
+    <main class="flex-1 w-full max-w-md px-6 pt-24 pb-32 flex flex-col">
+        <!-- Progress Section -->
+        <div class="mb-10">
+            <div class="flex justify-between items-end mb-4">
+                <span class="font-label font-semibold text-xs uppercase tracking-widest text-on-surface-variant">Session
+                    Calibration</span>
+                <span class="font-label font-bold text-sm text-primary">Step 2 of 5</span>
+            </div>
+            <div class="w-full h-[0.7rem] bg-surface-container-highest rounded-full overflow-hidden">
+                <div class="h-full w-[40%] bg-gradient-to-r from-primary to-inverse-primary rounded-full"></div>
+            </div>
+        </div>
+        <!-- Hero Content -->
+        <div class="mb-12">
+            <h2
+                class="text-[2.75rem] font-headline font-extrabold leading-tight -tracking-[0.02em] text-on-surface mb-3">
+                When are you most productive?
+            </h2>
+            <p class="text-on-surface-variant text-lg leading-relaxed font-medium">
+                Help us schedule your deep work sessions at times that match your natural energy.
+            </p>
+        </div>
+        <!-- Selection Grid -->
+        <div class="space-y-4">
+            <!-- Morning Card (Selected State Example) -->
+            <button
+                class="w-full text-left bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/20 shadow-[0_10px_30px_rgba(45,42,81,0.06)] ring-2 ring-primary ring-offset-4 ring-offset-background transition-all duration-200">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-3xl"
+                            style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">Morning</h3>
+                        <p class="font-label text-sm text-on-surface-variant mt-1">First light focus (6AM - 11AM)</p>
+                    </div>
+                    <div class="ml-auto">
+                        <span class="material-symbols-outlined text-primary">check_circle</span>
+                    </div>
+                </div>
+            </button>
+            <!-- Afternoon Card -->
+            <button
+                class="w-full text-left bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/10 hover:border-outline-variant/30 transition-all duration-200 group active:scale-[0.98]">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-secondary-container/30 transition-colors">
+                        <span
+                            class="material-symbols-outlined text-on-surface-variant text-3xl group-hover:text-secondary transition-colors">wb_twilight</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">Afternoon</h3>
+                        <p class="font-label text-sm text-on-surface-variant mt-1">Mid-day momentum (12PM - 5PM)</p>
+                    </div>
+                </div>
+            </button>
+            <!-- Night Card -->
+            <button
+                class="w-full text-left bg-surface-container-lowest rounded-lg p-8 border border-outline-variant/10 hover:border-outline-variant/30 transition-all duration-200 group active:scale-[0.98]">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-secondary-container/30 transition-colors">
+                        <span
+                            class="material-symbols-outlined text-on-surface-variant text-3xl group-hover:text-secondary transition-colors">dark_mode</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">Night</h3>
+                        <p class="font-label text-sm text-on-surface-variant mt-1">Quiet evening flow (7PM - 12AM)</p>
+                    </div>
+                </div>
+            </button>
+        </div>
+        <!-- Decorative Element -->
+        <div class="mt-12 opacity-40">
+            <div class="w-full h-48 rounded-lg overflow-hidden relative">
+                <img alt="Desk setup" class="w-full h-full object-cover grayscale"
+                    data-alt="clean minimal desk setup with a laptop and a soft plant with morning light coming through a window creating long shadows"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF2pNKXfdVvVL6Du4q1jOYqPctD3hN435H5ORdiC6UtToVl7n_tob_fyxquTZt_DuGUcBWUX25ingw5oKXIYjDaCKBYrNgkpmFwwkOHKPSHW4DFirXLYjSqfAS9puV777kysw4s3OA0E5KP-siOC0FgokdbRXvzuI7xX-j6iAWXD-8Ls1IDiGM6RVzX7O-fwYORBfxL214_eXn3qNQdKK40F8eiGtZOgyBwe3d8PFYvWeAfwbJRz8EXR7d-6qpO1EsxNk0zWMFfnM" />
+                <div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav class="fixed bottom-0 w-full z-50 pb-8 px-6 bg-transparent">
+        <div class="flex justify-between items-center w-full max-w-md mx-auto">
+            <button
+                class="text-[#5a5781] dark:text-[#aca8d7] font-['Plus_Jakarta_Sans'] font-medium px-6 py-4 hover:opacity-90 transition-opacity active:scale-98 duration-200 flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">chevron_left</span>
+                Back
+            </button>
+            <button
+                class="bg-gradient-to-br from-[#4353b2] to-[#8999fd] text-white rounded-full px-10 py-4 shadow-lg shadow-[#2d2a51]/10 font-['Plus_Jakarta_Sans'] font-semibold text-sm hover:opacity-90 transition-opacity active:scale-98 duration-200 flex items-center gap-2">
+                Next
+                <span class="material-symbols-outlined text-lg">chevron_right</span>
+            </button>
+        </div>
+    </nav>
+</body>
+
+</html>

@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!currentUser) return;
-    
+
     // Listen to tasks
     const qTasks = query(collection(db, 'users', currentUser.uid, 'tasks'));
     const unsubscribeTasks = onSnapshot(qTasks, (snapshot) => {
@@ -107,13 +107,13 @@ const Dashboard = () => {
         // Strip markdown backticks if any
         let cleanJson = responseText.replace(/^```json/g, '').replace(/```$/g, '').trim();
         newSchedule = JSON.parse(cleanJson);
-      } catch(e) {
+      } catch (e) {
         console.error("AI Output failed to parse:", responseText);
         alert("AI returned invalid data. Please try again.");
       }
 
       // Save to Firestore
-      if(newSchedule.length > 0) {
+      if (newSchedule.length > 0) {
         const todayStr = format(new Date(), 'yyyy-MM-dd');
         await setDoc(doc(db, 'users', currentUser.uid, 'schedule', todayStr), {
           items: newSchedule,
@@ -132,9 +132,9 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
       <TaskSidebar tasks={tasks} userId={currentUser?.uid} />
-      <CalendarGrid 
-        schedule={schedule} 
-        onGenerate={generateSchedule} 
+      <CalendarGrid
+        schedule={schedule}
+        onGenerate={generateSchedule}
         loading={loading}
         logOut={logOut}
       />
