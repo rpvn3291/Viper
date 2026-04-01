@@ -1,218 +1,195 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Onboarding Step 3: Work Preference</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Plus_Jakarta_Sans:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "secondary-fixed-dim": "#b4c1ff",
-                        "background": "#f9f5ff",
-                        "on-primary-container": "#00146f",
-                        "error-container": "#f74b6d",
-                        "on-surface": "#2d2a51",
-                        "error": "#b41340",
-                        "on-primary-fixed": "#000000",
-                        "inverse-on-surface": "#9c98c6",
-                        "tertiary-fixed": "#dee5fd",
-                        "primary-dim": "#3646a5",
-                        "surface-bright": "#f9f5ff",
-                        "on-surface-variant": "#5a5781",
-                        "on-tertiary-fixed": "#394154",
-                        "surface-dim": "#d4cfff",
-                        "surface-container-low": "#f3eeff",
-                        "on-secondary-fixed": "#1f2f6e",
-                        "on-secondary-fixed-variant": "#3d4c8d",
-                        "on-primary": "#f3f1ff",
-                        "surface-variant": "#ddd9ff",
-                        "secondary-dim": "#3c4b8c",
-                        "on-tertiary-fixed-variant": "#565d71",
-                        "surface-container-lowest": "#ffffff",
-                        "primary-fixed": "#8999fd",
-                        "on-secondary": "#f2f1ff",
-                        "tertiary-dim": "#484f63",
-                        "primary": "#4353b2",
-                        "surface": "#f9f5ff",
-                        "on-tertiary-container": "#4c5367",
-                        "on-primary-fixed-variant": "#071d81",
-                        "outline": "#75729e",
-                        "surface-container-highest": "#ddd9ff",
-                        "on-background": "#2d2a51",
-                        "surface-container": "#e9e5ff",
-                        "primary-fixed-dim": "#7c8cef",
-                        "tertiary-fixed-dim": "#d0d7ee",
-                        "secondary-container": "#c7cfff",
-                        "secondary": "#485798",
-                        "surface-container-high": "#e3dfff",
-                        "tertiary": "#545b6f",
-                        "primary-container": "#8999fd",
-                        "on-tertiary": "#f0f2ff",
-                        "on-error-container": "#510017",
-                        "on-error": "#ffefef",
-                        "surface-tint": "#4353b2",
-                        "inverse-surface": "#0b082f",
-                        "inverse-primary": "#8999fd",
-                        "outline-variant": "#aca8d7",
-                        "on-secondary-container": "#344383",
-                        "error-dim": "#a70138",
-                        "secondary-fixed": "#c7cfff",
-                        "tertiary-container": "#dee5fd"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope"],
-                        "body": ["Manrope"],
-                        "label": ["Plus Jakarta Sans"]
-                    },
-                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
-                },
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#4edea3",
+              "primary": "#ddb7ff",
+              "surface-container-high": "#2a2a2a",
+              "inverse-primary": "#842bd2",
+              "tertiary-container": "#00a572",
+              "secondary-container": "#03b5d3",
+              "on-secondary-fixed": "#001f26",
+              "surface": "#131313",
+              "on-tertiary": "#003824",
+              "on-error": "#690005",
+              "on-primary-fixed": "#2c0051",
+              "on-error-container": "#ffdad6",
+              "outline": "#988d9f",
+              "secondary-fixed": "#acedff",
+              "surface-variant": "#353534",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-primary": "#490080",
+              "tertiary-fixed": "#6ffbbe",
+              "inverse-on-surface": "#313030",
+              "surface-bright": "#393939",
+              "on-secondary-container": "#00424e",
+              "secondary": "#4cd7f6",
+              "error": "#ffb4ab",
+              "on-background": "#e5e2e1",
+              "surface-tint": "#ddb7ff",
+              "tertiary-fixed-dim": "#4edea3",
+              "surface-dim": "#131313",
+              "on-primary-container": "#400071",
+              "inverse-surface": "#e5e2e1",
+              "primary-fixed-dim": "#ddb7ff",
+              "on-tertiary-container": "#00311f",
+              "on-secondary": "#003640",
+              "surface-container-lowest": "#0e0e0e",
+              "secondary-fixed-dim": "#4cd7f6",
+              "on-primary-fixed-variant": "#6900b3",
+              "surface-container-low": "#1c1b1b",
+              "error-container": "#93000a",
+              "on-surface-variant": "#cfc2d6",
+              "surface-container-highest": "#353534",
+              "primary-container": "#b76dff",
+              "outline-variant": "#4d4354",
+              "on-secondary-fixed-variant": "#004e5c",
+              "primary-fixed": "#f0dbff",
+              "background": "#131313",
+              "surface-container": "#201f1f",
+              "on-tertiary-fixed": "#002113",
+              "on-surface": "#e5e2e1"
             },
-        }
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
     </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .tonal-shift-bg {
-            background: linear-gradient(135deg, #f9f5ff 0%, #f3eeff 100%);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(24px);
-        }
-
-        .ambient-glow {
-            box-shadow: 0 10px 30px rgba(45, 42, 81, 0.06);
-        }
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(53, 53, 52, 0.6);
+        backdrop-filter: blur(12px);
+      }
+      .light-leak-edge {
+        background: linear-gradient(to right, transparent, #ddb7ff33, transparent);
+      }
     </style>
-    <style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
-</head>
-
-<body class="bg-background text-on-surface font-body min-h-screen flex flex-col items-center">
-    <!-- TopAppBar -->
-    <header
-        class="fixed top-0 w-full z-50 bg-[#f9f5ff] dark:bg-[#1a1a2e] flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto tonal-shift-bg">
-        <div class="flex items-center gap-4">
-            <button
-                class="text-[#5a5781] dark:text-[#aca8d7] hover:bg-[#e9e5ff] dark:hover:bg-[#2d2a51] rounded-full transition-all p-2 active:scale-95 duration-200">
-                <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
-            </button>
-            <h1 class="font-['Manrope'] font-bold tracking-tight text-xl text-[#2d2a51] dark:text-[#e9e5ff]">Onboarding
-            </h1>
-        </div>
-        <div class="flex items-center">
-            <span class="font-label text-sm font-semibold text-on-surface-variant">Step 3 of 5</span>
-        </div>
-    </header>
-    <!-- Main Content Area -->
-    <main class="flex-1 w-full max-w-md px-6 pt-24 pb-32 flex flex-col">
-        <!-- Progress Bar -->
-        <div class="w-full bg-surface-container-highest h-[0.7rem] rounded-full mb-12">
-            <div class="h-full bg-gradient-to-r from-primary to-inverse-primary rounded-full transition-all duration-500"
-                style="width: 60%;"></div>
-        </div>
-        <!-- Editorial Header Section -->
-        <section class="mb-10">
-            <h2 class="font-headline text-[2.75rem] leading-[1.1] font-extrabold tracking-tight text-on-surface mb-4">
-                How do you prefer to start your work?
-            </h2>
-            <p class="font-body text-lg text-on-surface-variant leading-relaxed">
-                We'll suggest tasks based on your energy levels.
-            </p>
-        </section>
-        <!-- Preference Cards Container -->
-        <div class="space-y-4">
-            <!-- Hard Tasks Card (Active/Selected State Example) -->
-            <label class="relative block cursor-pointer group">
-                <input checked="" class="peer sr-only" name="preference" type="radio" />
-                <div
-                    class="p-8 rounded-lg surface-container-lowest border border-outline-variant/20 ambient-glow transition-all duration-300 peer-checked:ring-2 peer-checked:ring-primary peer-checked:bg-surface-container-lowest peer-checked:border-primary/20">
-                    <div class="flex items-start gap-5">
-                        <div
-                            class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shrink-0 transition-transform group-active:scale-95">
-                            <span class="material-symbols-outlined" data-icon="bolt"
-                                style="font-variation-settings: 'FILL' 1;">bolt</span>
-                        </div>
-                        <div>
-                            <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Start with hard tasks</h3>
-                            <p class="font-body text-on-surface-variant text-sm leading-relaxed">
-                                Tackle your biggest challenges while your focus is highest.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </label>
-            <!-- Easy Tasks Card -->
-            <label class="relative block cursor-pointer group">
-                <input class="peer sr-only" name="preference" type="radio" />
-                <div
-                    class="p-8 rounded-lg bg-surface-container-low border border-outline-variant/10 ambient-glow transition-all duration-300 peer-checked:ring-2 peer-checked:ring-primary peer-checked:bg-surface-container-lowest peer-checked:border-primary/20 hover:bg-surface-container">
-                    <div class="flex items-start gap-5">
-                        <div
-                            class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant shrink-0 transition-transform group-active:scale-95">
-                            <span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
-                        </div>
-                        <div>
-                            <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Start with easy tasks</h3>
-                            <p class="font-body text-on-surface-variant text-sm leading-relaxed">
-                                Build momentum with quick wins to get your day moving.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </label>
-        </div>
-        <!-- Decorative Element -->
-        <div class="mt-12 flex-1 flex items-end justify-center opacity-40">
-            <div class="w-24 h-1 bg-surface-container-highest rounded-full"></div>
-        </div>
-    </main>
-    <!-- BottomNavBar -->
-    <footer class="fixed bottom-0 w-full z-50 pb-8 px-6 bg-transparent">
-        <div class="flex justify-between items-center w-full max-w-md mx-auto">
-            <!-- Back Button -->
-            <button
-                class="text-[#5a5781] dark:text-[#aca8d7] font-['Plus_Jakarta_Sans'] font-medium px-6 py-4 hover:opacity-90 transition-opacity active:scale-98 transition-transform duration-200 flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
-                Back
-            </button>
-            <!-- Next Button -->
-            <button
-                class="bg-gradient-to-br from-[#4353b2] to-[#8999fd] text-white font-['Plus_Jakarta_Sans'] font-semibold text-sm rounded-full px-10 py-4 shadow-lg shadow-[#2d2a51]/10 hover:opacity-90 transition-opacity active:scale-98 transition-transform duration-200 flex items-center gap-2">
-                Next
-                <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
-            </button>
-        </div>
-    </footer>
-    <!-- Abstract Background Texture -->
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-primary-container/10 blur-[120px] rounded-full">
-        </div>
-        <div
-            class="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-secondary-container/10 blur-[120px] rounded-full">
-        </div>
-    </div>
-</body>
-
-</html>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col items-center selection:bg-primary/30 selection:text-primary">
+<!-- Top Navigation Bar (Predicted from JSON: TopAppBar) -->
+<header class="bg-[#131313] docked full-width top-0 flex justify-between items-center w-full px-6 py-4 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-purple-500">signal_cellular_alt</span>
+<h1 class="font-space-grotesk tracking-tighter uppercase text-xl font-bold text-purple-500 tracking-widest">NEON_PROTOCOL</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-500 hover:text-purple-400 transition-colors duration-100 cursor-pointer snap-100ms active:scale-95">settings</span>
+</div>
+<div class="absolute bottom-0 left-0 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent h-[1px] w-full"></div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-md px-6 pt-8 pb-32 flex flex-col gap-8 relative">
+<!-- Progress System Overlay -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="font-headline text-[10px] uppercase tracking-[0.2em] text-secondary">Phase_03 // Logic_Gate</span>
+<span class="font-headline text-sm font-bold text-primary">60%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[60%] shadow-[0_0_8px_rgba(76,215,246,0.5)]"></div>
+</div>
+</section>
+<!-- Main Question -->
+<section class="space-y-2">
+<h2 class="font-headline text-3xl font-bold tracking-tight text-on-surface">How do you prefer to start your work?</h2>
+<p class="font-body text-sm text-on-surface-variant/70 leading-relaxed">Select your operational preference to optimize task sequencing.</p>
+</section>
+<!-- Questionnaire Cards -->
+<div class="flex flex-col gap-4">
+<!-- Option 1: Hard Tasks -->
+<button class="group relative flex flex-col text-left transition-all duration-100 active:scale-[0.98] focus:outline-none">
+<div class="glass-card border border-outline-variant/10 rounded-xl rounded-br-sm p-6 w-full group-hover:border-primary/30 transition-colors group-focus:ring-1 ring-primary/50">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/15">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="bolt">bolt</span>
+</div>
+<span class="font-headline text-[10px] tracking-widest text-on-surface-variant uppercase bg-surface-container-high px-2 py-1">Mode_High_Energy</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-2 uppercase tracking-wide">Start with hard tasks</h3>
+<p class="font-headline text-xs text-on-surface-variant leading-relaxed tracking-tight">Tackle the most complex objectives while cognitive load capacity is at its peak. Ideal for deep-focus engineering.</p>
+<!-- Tactical Pulse -->
+<div class="absolute bottom-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div>
+<span class="font-headline text-[8px] text-tertiary tracking-tighter">READY_TO_BOOT</span>
+</div>
+</div>
+</button>
+<!-- Option 2: Easy Tasks -->
+<button class="group relative flex flex-col text-left transition-all duration-100 active:scale-[0.98] focus:outline-none">
+<div class="glass-card border border-outline-variant/10 rounded-xl rounded-br-sm p-6 w-full group-hover:border-secondary/30 transition-colors group-focus:ring-1 ring-secondary/50">
+<div class="flex justify-between items-start mb-6">
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<span class="font-headline text-[10px] tracking-widest text-on-surface-variant uppercase bg-surface-container-high px-2 py-1">Mode_Momentum</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-2 uppercase tracking-wide">Start with easy tasks</h3>
+<p class="font-headline text-xs text-on-surface-variant leading-relaxed tracking-tight">Build momentum through rapid execution of low-complexity items. Secure early wins to calibrate performance.</p>
+</div>
+</button>
+</div>
+<!-- Decorative Telemetry Visual -->
+<div class="mt-4 border-t border-outline-variant/10 pt-6 opacity-30 flex justify-between">
+<div class="space-y-1">
+<div class="h-1 w-12 bg-on-surface-variant"></div>
+<div class="h-1 w-8 bg-on-surface-variant/50"></div>
+<div class="h-1 w-10 bg-on-surface-variant/30"></div>
+</div>
+<div class="font-headline text-[8px] text-on-surface-variant flex flex-col items-end">
+<span>LATENCY: 12MS</span>
+<span>SYNC_STATUS: ACTIVE</span>
+</div>
+</div>
+</main>
+<!-- Navigation Footer (Predicted from JSON: BottomNavBar) -->
+<footer class="fixed bottom-0 left-0 w-full flex justify-between items-center px-6 py-4 gap-4 bg-[#131313]/80 backdrop-blur-xl z-50 border-t border-purple-500/10">
+<!-- Previous Button (Inactive Navigation Style) -->
+<button class="flex flex-col items-center justify-center text-cyan-400 border border-cyan-400/30 px-8 py-3 flex-1 font-inter text-[10px] uppercase tracking-[0.1em] font-bold hover:bg-cyan-500/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all active:scale-95">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+<span>PREVIOUS</span>
+</div>
+</button>
+<!-- Continue Button (Active Navigation Style) -->
+<button class="flex flex-col items-center justify-center bg-purple-500 text-white rounded-none px-8 py-3 flex-1 font-inter text-[10px] uppercase tracking-[0.1em] font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all active:scale-95">
+<div class="flex items-center gap-2">
+<span>CONTINUE</span>
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</footer>
+<!-- Background Elements -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute top-[20%] -right-[5%] w-[30%] h-[30%] bg-secondary/5 blur-[100px] rounded-full"></div>
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.02)_0%,transparent_70%)]"></div>
+<!-- Scanned Line Texture -->
+<div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 100% 4px;"></div>
+</div>
+</body></html>

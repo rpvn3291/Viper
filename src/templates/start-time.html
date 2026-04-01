@@ -1,209 +1,184 @@
 <!DOCTYPE html>
 
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "surface-tint": "#4353b2",
-                        "surface-container-lowest": "#ffffff",
-                        "secondary-container": "#c7cfff",
-                        "on-error": "#ffefef",
-                        "error-container": "#f74b6d",
-                        "secondary-dim": "#3c4b8c",
-                        "primary": "#4353b2",
-                        "on-primary": "#f3f1ff",
-                        "error-dim": "#a70138",
-                        "on-tertiary-container": "#4c5367",
-                        "on-tertiary": "#f0f2ff",
-                        "surface-bright": "#f9f5ff",
-                        "tertiary-dim": "#484f63",
-                        "inverse-primary": "#8999fd",
-                        "secondary-fixed-dim": "#b4c1ff",
-                        "surface": "#f9f5ff",
-                        "error": "#b41340",
-                        "outline-variant": "#aca8d7",
-                        "primary-fixed-dim": "#7c8cef",
-                        "on-tertiary-fixed-variant": "#565d71",
-                        "on-secondary-fixed": "#1f2f6e",
-                        "on-error-container": "#510017",
-                        "on-secondary-container": "#344383",
-                        "on-primary-fixed": "#000000",
-                        "secondary-fixed": "#c7cfff",
-                        "tertiary-fixed-dim": "#d0d7ee",
-                        "inverse-on-surface": "#9c98c6",
-                        "on-secondary": "#f2f1ff",
-                        "inverse-surface": "#0b082f",
-                        "tertiary": "#545b6f",
-                        "surface-container-high": "#e3dfff",
-                        "on-background": "#2d2a51",
-                        "surface-dim": "#d4cfff",
-                        "tertiary-container": "#dee5fd",
-                        "on-surface-variant": "#5a5781",
-                        "primary-dim": "#3646a5",
-                        "secondary": "#485798",
-                        "surface-container-highest": "#ddd9ff",
-                        "on-primary-container": "#00146f",
-                        "on-secondary-fixed-variant": "#3d4c8d",
-                        "on-tertiary-fixed": "#394154",
-                        "outline": "#75729e",
-                        "primary-fixed": "#8999fd",
-                        "primary-container": "#8999fd",
-                        "surface-variant": "#ddd9ff",
-                        "on-surface": "#2d2a51",
-                        "surface-container": "#e9e5ff",
-                        "surface-container-low": "#f3eeff",
-                        "on-primary-fixed-variant": "#071d81",
-                        "background": "#f9f5ff",
-                        "tertiary-fixed": "#dee5fd"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope"],
-                        "body": ["Manrope"],
-                        "label": ["Plus Jakarta Sans"]
-                    },
-                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
-                },
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEON_PROTOCOL - Start Time</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#4edea3",
+              "primary": "#ddb7ff",
+              "surface-container-high": "#2a2a2a",
+              "inverse-primary": "#842bd2",
+              "tertiary-container": "#00a572",
+              "secondary-container": "#03b5d3",
+              "on-secondary-fixed": "#001f26",
+              "surface": "#131313",
+              "on-tertiary": "#003824",
+              "on-error": "#690005",
+              "on-primary-fixed": "#2c0051",
+              "on-error-container": "#ffdad6",
+              "outline": "#988d9f",
+              "secondary-fixed": "#acedff",
+              "surface-variant": "#353534",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-primary": "#490080",
+              "tertiary-fixed": "#6ffbbe",
+              "inverse-on-surface": "#313030",
+              "surface-bright": "#393939",
+              "on-secondary-container": "#00424e",
+              "secondary": "#4cd7f6",
+              "error": "#ffb4ab",
+              "on-background": "#e5e2e1",
+              "surface-tint": "#ddb7ff",
+              "tertiary-fixed-dim": "#4edea3",
+              "surface-dim": "#131313",
+              "on-primary-container": "#400071",
+              "inverse-surface": "#e5e2e1",
+              "primary-fixed-dim": "#ddb7ff",
+              "on-tertiary-container": "#00311f",
+              "on-secondary": "#003640",
+              "surface-container-lowest": "#0e0e0e",
+              "secondary-fixed-dim": "#4cd7f6",
+              "on-primary-fixed-variant": "#6900b3",
+              "surface-container-low": "#1c1b1b",
+              "error-container": "#93000a",
+              "on-surface-variant": "#cfc2d6",
+              "surface-container-highest": "#353534",
+              "primary-container": "#b76dff",
+              "outline-variant": "#4d4354",
+              "on-secondary-fixed-variant": "#004e5c",
+              "primary-fixed": "#f0dbff",
+              "background": "#131313",
+              "surface-container": "#201f1f",
+              "on-tertiary-fixed": "#002113",
+              "on-surface": "#e5e2e1"
             },
-        }
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
     </script>
-    <style>
+<style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-
-        .ambient-glow {
-            box-shadow: 0 10px 30px rgba(45, 42, 81, 0.06);
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #201f1f;
+            height: 4px;
         }
-
-        .time-slider::-webkit-slider-thumb {
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 28px;
-            height: 28px;
-            background: #4353b2;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 4px solid #ffffff;
-            box-shadow: 0 4px 10px rgba(67, 83, 178, 0.3);
-        }
-
-        .time-slider::-moz-range-thumb {
-            width: 28px;
-            height: 28px;
-            background: #4353b2;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 4px solid #ffffff;
-            box-shadow: 0 4px 10px rgba(67, 83, 178, 0.3);
+            margin-top: -6px;
+            background-color: #4cd7f6;
+            height: 16px;
+            width: 16px;
+            border-radius: 0px;
+            box-shadow: 0 0 10px #4cd7f6;
         }
     </style>
-    <style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
-</head>
-
-<body class="bg-surface font-body text-on-surface flex items-center justify-center min-h-screen p-4">
-    <!-- Main Onboarding Container (Centered Mobile Card) -->
-    <div
-        class="w-full max-w-md bg-surface-container-low rounded-lg overflow-hidden ambient-glow border border-outline-variant/10">
-        <!-- Header Section (Minimalist focused view as per Hierarchy of Focus) -->
-        <div class="px-8 pt-8 pb-4">
-            <div class="flex items-center justify-between mb-6">
-                <div class="w-10 h-10 flex items-center justify-center text-outline opacity-20">
-                    <span class="material-symbols-outlined">arrow_back</span>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-background font-body min-h-screen flex flex-col items-center selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="bg-[#131313] fixed top-0 w-full z-50 shadow-[0px_0px_15px_rgba(168,85,247,0.1)] flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-purple-500">signal_cellular_alt</span>
+<span class="text-xl font-bold text-purple-500 tracking-widest font-headline uppercase">NEON_PROTOCOL</span>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-purple-500 hover:text-purple-400 transition-colors duration-100 cursor-pointer active:scale-95">settings</span>
+</div>
+<div class="bg-gradient-to-r from-transparent via-purple-500/20 to-transparent h-[1px] w-full absolute bottom-0 left-0"></div>
+</header>
+<!-- Progress Bar (Contextual) -->
+<div class="fixed top-16 left-0 w-full h-1 bg-surface-container-low z-40">
+<div class="h-full bg-secondary shadow-[0_0_8px_rgba(76,215,246,0.6)]" style="width: 20%"></div>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-md px-6 pt-32 pb-32 flex flex-col items-center">
+<!-- Tactical Header -->
+<div class="w-full mb-8">
+<span class="font-headline text-[10px] uppercase tracking-[0.2em] text-secondary opacity-70 mb-2 block">Step 01 / 05</span>
+<h1 class="font-headline text-3xl font-bold tracking-tight text-on-surface leading-none">What time do you usually start your day?</h1>
+</div>
+<!-- Glassmorphic HUD Card -->
+<div class="w-full bg-surface-variant/60 backdrop-blur-xl rounded-[20px] p-8 relative overflow-hidden border border-outline-variant/15 shadow-[0px_0px_15px_rgba(168,85,247,0.05)]">
+<!-- Ambient Glow Element -->
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 blur-[40px] rounded-full"></div>
+<!-- Telemetry Label -->
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse shadow-[0_0_5px_#4edea3]"></span>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Live_Sensor_Input</span>
+</div>
+<span class="font-headline text-[10px] text-outline">v2.0.48</span>
+</div>
+<!-- Digital Time Display -->
+<div class="flex flex-col items-center justify-center py-10 relative">
+<div class="font-headline text-7xl font-bold tracking-tighter text-secondary drop-shadow-[0_0_20px_rgba(76,215,246,0.4)]">
+                    07:00
                 </div>
-                <h2 class="font-headline font-bold text-lg text-on-surface tracking-tight">Onboarding</h2>
-                <div class="w-10"></div> <!-- Spacer for symmetry -->
-            </div>
-            <!-- Progress Tracking -->
-            <div class="space-y-3">
-                <div class="flex justify-between items-end">
-                    <span class="font-label text-sm font-semibold text-primary">Step 1 of 5</span>
-                    <span class="font-label text-xs text-on-surface-variant uppercase tracking-widest">20%
-                        Complete</span>
-                </div>
-                <div class="w-full h-2 bg-surface-container-highest rounded-full">
-                    <div class="h-full w-1/5 bg-gradient-to-r from-primary to-inverse-primary rounded-full"></div>
-                </div>
-            </div>
-        </div>
-        <!-- Content Section -->
-        <div class="px-10 py-10 text-center">
-            <div class="mb-8">
-                <h1
-                    class="font-headline text-[2.25rem] font-extrabold leading-tight tracking-tight text-on-surface mb-4">
-                    What time do you usually start your day?
-                </h1>
-                <p class="font-body text-on-surface-variant text-base leading-relaxed max-w-[280px] mx-auto">
-                    We'll tailor your peak focus hours to your unique routine.
-                </p>
-            </div>
-            <!-- Time Display Card -->
-            <div
-                class="relative bg-surface-container-lowest rounded-lg p-10 mb-10 ambient-glow border border-outline-variant/5">
-                <div class="flex flex-col items-center">
-                    <span
-                        class="font-label text-[0.7rem] font-bold text-primary uppercase tracking-[0.2em] mb-2">Morning
-                        Routine</span>
-                    <div class="font-headline text-6xl font-extrabold text-on-surface flex items-baseline gap-1">
-                        07<span class="text-primary-dim opacity-40">:</span>00
-                    </div>
-                    <div class="mt-8 w-full px-2">
-                        <input
-                            class="time-slider w-full h-2 bg-surface-container-highest rounded-full appearance-none cursor-pointer"
-                            max="1440" min="0" type="range" value="420" />
-                        <div class="flex justify-between mt-4 px-1">
-                            <span class="font-label text-[10px] font-semibold text-on-surface-variant/50">12:00
-                                AM</span>
-                            <span class="font-label text-[10px] font-semibold text-on-surface-variant/50">11:59
-                                PM</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Tips / Contextual Info -->
-            <div class="flex items-center justify-center gap-2 text-on-surface-variant/70 mb-2">
-                <span class="material-symbols-outlined text-sm"
-                    style="font-variation-settings: 'FILL' 1;">light_mode</span>
-                <span class="font-label text-xs font-medium italic">Early birds often peak before noon</span>
-            </div>
-        </div>
-        <!-- Footer Controls -->
-        <div class="px-8 pb-10 flex flex-col items-center">
-            <button
-                class="w-full py-5 px-10 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-bold text-lg rounded-xl ambient-glow hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-                Next Step
-                <span class="material-symbols-outlined">arrow_forward</span>
-            </button>
-            <button class="mt-6 font-label text-sm font-semibold text-on-surface-variant/40 cursor-not-allowed"
-                disabled="">
-                I'll set this later
-            </button>
-        </div>
-    </div>
-    <!-- Atmospheric Background Elements -->
-    <div class="fixed inset-0 -z-10 bg-surface pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
-        <div
-            class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary-container/10 blur-[150px]">
-        </div>
-    </div>
-</body>
-
-</html>
+<div class="font-label text-[12px] uppercase tracking-[0.3em] text-outline mt-4">Meridiem: AM</div>
+</div>
+<!-- Neon Slider Component -->
+<div class="mt-8">
+<input class="w-full appearance-none bg-transparent cursor-pointer" max="1440" min="0" type="range" value="420"/>
+<div class="flex justify-between mt-4">
+<span class="font-label text-[10px] text-outline tracking-wider uppercase">00:00</span>
+<span class="font-label text-[10px] text-outline tracking-wider uppercase">12:00</span>
+<span class="font-label text-[10px] text-outline tracking-wider uppercase">23:59</span>
+</div>
+</div>
+</div>
+<!-- System Message -->
+<div class="mt-8 flex gap-3 p-4 bg-surface-container-low border-l-2 border-primary rounded-r-lg w-full">
+<span class="material-symbols-outlined text-primary text-sm">info</span>
+<p class="text-xs text-on-surface-variant font-label leading-relaxed">
+<span class="text-primary font-bold">SYSTEM_LOG:</span> Optimal circadian synchronization requires consistent wake times. Adjust the telemetry slider to match your standard deployment routine.
+            </p>
+</div>
+</main>
+<!-- BottomNavBar (Action Shell) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-between items-center px-6 py-4 gap-4 bg-[#131313]/80 backdrop-blur-xl border-t border-purple-500/10 z-50">
+<!-- PREVIOUS (Inactive/Secondary Action) -->
+<button class="flex flex-col items-center justify-center text-cyan-400 border border-cyan-400/30 px-8 py-3 font-inter text-[10px] uppercase tracking-[0.1em] font-bold hover:bg-cyan-500/10 hover:shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all duration-100 active:scale-95">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+<span>PREVIOUS</span>
+</div>
+</button>
+<!-- CONTINUE (Active/Primary Action) -->
+<button class="flex flex-col items-center justify-center bg-purple-500 text-white px-8 py-3 font-inter text-[10px] uppercase tracking-[0.1em] font-bold hover:bg-purple-400 transition-all duration-100 active:scale-95 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+<div class="flex items-center gap-2">
+<span>CONTINUE</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</div>
+</button>
+</nav>
+<!-- Decorative HUD Elements -->
+<div class="fixed top-1/4 -left-4 opacity-20 pointer-events-none">
+<div class="w-[1px] h-32 bg-gradient-to-b from-transparent via-secondary to-transparent"></div>
+</div>
+<div class="fixed bottom-1/4 -right-4 opacity-20 pointer-events-none">
+<div class="w-[1px] h-32 bg-gradient-to-b from-transparent via-primary to-transparent"></div>
+</div>
+</body></html>

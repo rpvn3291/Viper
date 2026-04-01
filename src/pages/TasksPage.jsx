@@ -5,10 +5,10 @@ import { collection, query, onSnapshot, doc, getDoc, setDoc, addDoc, serverTimes
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { GoogleGenAI } from '@google/genai';
-import { Plus, Check, Trash2, RefreshCcw, Settings, LogOut } from 'lucide-react';
+import AppLayout from '../components/AppLayout';
 
 const TasksPage = () => {
-  const { currentUser, logOut } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   
   const [tasks, setTasks] = useState([]);
@@ -23,17 +23,14 @@ const TasksPage = () => {
   const [dailyMood, setDailyMood] = useState(null);
   const [completedRoutines, setCompletedRoutines] = useState([]);
 
-  // Initial Fetching
   useEffect(() => {
     if (!currentUser) return;
     
-    // Fetch Profile first for redirection logic
     getDoc(doc(db, 'users', currentUser.uid, 'profile', 'config'))
       .then(snap => {
         if (snap.exists()) {
           setProfile(snap.data());
         } else {
-          // No profile found, redirect to questionnaire
           navigate('/setup');
         }
       })
@@ -41,7 +38,6 @@ const TasksPage = () => {
         console.error("Firestore Error:", err);
       });
 
-    // Listen to Tasks explicitly scoped to the viewing Date
     const qTasks = query(
       collection(db, 'users', currentUser.uid, 'tasks'),
       where('date', '==', targetDate)
@@ -49,12 +45,10 @@ const TasksPage = () => {
     const unsubscribeTasks = onSnapshot(qTasks, (snapshot) => {
       const tsks = [];
       snapshot.forEach(doc => tsks.push({ id: doc.id, ...doc.data() }));
-      // sort by created at descending
       tsks.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
       setTasks(tsks);
     });
 
-    // Listen to Daily Routines
     const qRoutines = query(collection(db, 'users', currentUser.uid, 'routines'));
     const unsubscribeRoutines = onSnapshot(qRoutines, (snapshot) => {
       const rts = [];
@@ -62,7 +56,6 @@ const TasksPage = () => {
       setRoutines(rts);
     });
 
-    // Fetch Daily Context (mood & condition) for the target date
     const fetchDailyContext = async () => {
       try {
         const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
@@ -98,7 +91,6 @@ const TasksPage = () => {
     }
   };
 
-  // Task Actions
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -117,7 +109,7 @@ const TasksPage = () => {
           priority: "normal",
           duration: estimatedHours,
           status: "pending",
-          date: targetDate, // Strictly bind to target Date
+          date: targetDate,
           createdAt: serverTimestamp()
         });
       }
@@ -148,7 +140,6 @@ const TasksPage = () => {
         : [...completedRoutines, routineId];
       
       setCompletedRoutines(newCompletedRoutines);
-
       const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
       await setDoc(docRef, { completedRoutines: newCompletedRoutines, updatedAt: serverTimestamp() }, { merge: true });
     } catch (err) {
@@ -160,7 +151,6 @@ const TasksPage = () => {
     await deleteDoc(doc(db, 'users', currentUser.uid, 'routines', routineId));
   };
 
-  // AI Generation
   const generateSchedule = async () => {
     if (!profile || tasks.filter(t => t.status === 'pending').length === 0) {
       alert("Please add some pending tasks to generate a schedule!");
@@ -197,10 +187,6 @@ const TasksPage = () => {
           availableHours: Number(profile.availableHours),
           blockedTime: profile.blockedTime,
           sleepTime: profile.sleepTime,
-          workStyle: profile.workStyle || 'deep-work',
-          chronotype: profile.chronotype || 'early-bird',
-          hobbies: profile.hobbies || '',
-          dislikes: profile.dislikes || ''
         },
         history: tasks.filter(t => t.status === 'completed' || t.status === 'missed').map(t => ({
           task: t.task,
@@ -217,60 +203,41 @@ const TasksPage = () => {
 
         The user has declared their mood for today is: ${dailyMood ? `"${dailyMood}"` : 'neutral'}.
         They have provided extra instructions/conditions for today: "${dailyCondition ? dailyCondition : 'None'}".
-        You MUST accommodate this mood and condition. For instance, if they are tired, lack interest, or feel sad, you should space out tasks, include ample breaks, or avoid packing the schedule. If they are happy or energetic, you can bunch challenging tasks during peak times.
-
+        You MUST accommodate this mood and condition.
 
         Your job is to act as a calendar engine for the targetDate: ${targetDate}.
-        Assign a precise 'start' and 'end' time (in 24-hour decimal format, e.g., 8.5 for 08:30 or 14.25 for 14:15) for every standard task AND every daily routine.
+        Assign a precise 'start' and 'end' time (in 24-hour decimal format) for every standard task AND every daily routine.
         
         RULES:
-        1. Base your scheduling around the user's Chronotype ('early-bird', 'night-owl', etc.) and Peak Productivity Time.
-        2. NEVER schedule any tasks or routines during the user's sleepTime (start to end).
+        1. Base your scheduling around the user's Peak Productivity Time.
+        2. NEVER schedule any tasks during the user's sleepTime.
         3. ${isWeekend 
-            ? "Today is a WEEKEND. The user's professional blocked time DOES NOT APPLY. You have full freedom to schedule personal tasks and routines throughout the day (except during sleepTime)." 
-            : "NEVER schedule personal tasks during the user's professional blockedTime (but professional/work tasks can be scheduled here if explicit). If there is no specific professional task, do not schedule anything in blockedTime."
+            ? "Today is a WEEKEND. The user's professional blocked time DOES NOT APPLY." 
+            : "NEVER schedule personal tasks during the user's professional blockedTime."
         }
-        4. Do not just list them sequentially. Consider what the task/routine is. For example, align sleep-related routines with sleepTime.
-        4. Spread tasks out intelligently if their workStyle is 'pomodoro', or group them if 'deep-work'.
-        5. Observe the task history: if they notoriously 'miss' a specific task, try scheduling it during their Peak Productivity Time.
-        6. You must schedule EVERY task in the pending backlog PLUS EVERY routine inside the dailyRoutines array.
-        7. The 'taskId' should be returned exactly as provided (if any). Daily routines will not have a taskId, do not invent one.
+        4. You must schedule EVERY task in the pending backlog PLUS EVERY routine.
+        5. The 'taskId' should be returned exactly as provided.
 
-        Output EXACTLY valid JSON matching the following schema, nothing else, no markdown formatting:
+        Output EXACTLY valid JSON matching the following schema:
         [
-          { "task": "Task Name", "start": 8.5, "end": 10.0, "priority": "high", "taskId": "abc" },
-          { "task": "Gym", "start": 17.0, "end": 18.0, "priority": "medium" }
+          { "task": "Task Name", "start": 8.5, "end": 10.0, "priority": "high", "taskId": "abc" }
         ]
       `;
 
-      const modelsToTry = [
-        'gemini-3-flash-preview',
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash'
-      ];
-
+      const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
       let result = null;
-      let usedModel = '';
 
       for (const modelName of modelsToTry) {
-        console.log(`🚀 Sending request to Gemini using model: ${modelName}...`);
         try {
-          result = await ai.models.generateContent({
-            model: modelName,
-            contents: prompt
-          });
-          usedModel = modelName;
-          console.log(`✅ Successfully received response from exactly this model: ${usedModel}!`);
-          break; // Stop looping once we get a successful response
+          result = await ai.models.generateContent({ model: modelName, contents: prompt });
+          break;
         } catch (error) {
-          console.warn(`⚠️ Model ${modelName} failed (likely high demand or 503). Attempting fallback... Error message:`, error.message);
+          console.warn(`Model ${modelName} failed:`, error.message);
         }
       }
 
-      // If every single model fails
       if (!result) {
-        throw new Error("All backup Gemini models are currently overloaded. Please try again later.");
+        throw new Error("All Gemini models are currently overloaded.");
       }
       
       const responseText = result.text.trim();
@@ -284,14 +251,11 @@ const TasksPage = () => {
         return;
       }
 
-      console.log("🧠 Writing smart timestamped schedule to database...");
-
       if(newSchedule.length > 0) {
         await setDoc(doc(db, 'users', currentUser.uid, 'schedule', targetDate), {
           items: newSchedule,
           generatedAt: new Date().toISOString()
         });
-        // Immediately redirect to dashboard/calendar
         navigate('/calendar', { state: { date: targetDate } });
       }
 
@@ -304,192 +268,283 @@ const TasksPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 relative p-6 font-sans flex flex-col items-center">
-      {/* Top Navbar */}
-      <div className="w-full max-w-4xl flex justify-between items-center mb-8 bg-white p-4 px-6 rounded-2xl shadow-sm border border-slate-100">
-        <h1 className="text-2xl font-black text-slate-800 tracking-tight">VIPER Task Management</h1>
-        <div className="flex gap-4">
-          <button onClick={() => navigate('/settings')} className="text-slate-500 hover:text-primary-600 flex items-center gap-2 font-medium transition">
-            <Settings className="w-5 h-5" /> Settings
-          </button>
-          <button onClick={() => { logOut(); navigate('/'); }} className="text-slate-500 hover:text-red-500 flex items-center gap-2 font-medium transition">
-            <LogOut className="w-5 h-5" /> Logout
-          </button>
-        </div>
-      </div>
+    <AppLayout>
+      <div className="p-8 min-h-[calc(100vh-64px)]">
+        <div className="grid grid-cols-12 gap-8 max-w-7xl mx-auto">
+          {/* Left Panel: Task Engine */}
+          <div className="col-span-12 lg:col-span-7 space-y-8">
+            {/* Date and Task Input Section */}
+            <div className="bg-surface-container-low p-6 rounded-xl rounded-br-sm hud-border-cyan">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col">
+                  <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-1">Target Date</span>
+                  <div className="flex items-center gap-3 bg-surface-container-lowest px-4 py-2 rounded border border-outline-variant/20">
+                    <span className="material-symbols-outlined text-secondary">calendar_month</span>
+                    <input 
+                      type="date" 
+                      value={targetDate}
+                      onChange={(e) => setTargetDate(e.target.value)}
+                      className="bg-transparent border-none text-on-surface font-headline font-bold text-lg tracking-widest outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em]">Operational Status</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div>
+                    <span className="text-tertiary font-headline font-bold text-xs uppercase">READY</span>
+                  </div>
+                </div>
+              </div>
 
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        {/* Left Column: Form & Actions */}
-        <div className="md:col-span-1 flex flex-col gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex justify-between items-center">
-              Target Date
-            </h2>
-            <input 
-              type="date" 
-              value={targetDate}
-              onChange={(e) => setTargetDate(e.target.value)}
-              className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 focus:border-primary-500 outline-none transition-colors font-semibold text-slate-700"
-            />
-          </div>
+              {/* Task Input Form */}
+              <form onSubmit={handleAdd} className="space-y-4">
+                <div>
+                  <span className="font-label text-[10px] text-secondary uppercase tracking-[0.2em] mb-2 block">Initialize Mission Task</span>
+                  <input 
+                    type="text" 
+                    placeholder="ENTER TASK PARAMETERS..." 
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    className="w-full bg-surface-container-lowest border-none focus:ring-0 focus:border-b-2 focus:border-secondary border-b-2 border-outline-variant/10 p-4 font-headline text-lg tracking-tight placeholder:text-zinc-700 text-on-surface outline-none"
+                    required
+                  />
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2 block">Duration (hrs)</span>
+                    <input 
+                      type="number" 
+                      min="0.5" 
+                      step="0.5" 
+                      value={estimatedHours}
+                      onChange={(e) => setEstimatedHours(Number(e.target.value))}
+                      className="w-full bg-surface-container-lowest border-none focus:ring-0 focus:border-b-2 focus:border-secondary border-b-2 border-outline-variant/10 p-4 font-headline text-lg tracking-tight text-on-surface outline-none"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <label className="flex items-center gap-2 text-zinc-400 font-label text-xs uppercase tracking-widest cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={isDaily} 
+                        onChange={(e) => setIsDaily(e.target.checked)} 
+                        className="w-4 h-4 rounded border-zinc-600 bg-surface-container-lowest text-secondary focus:ring-secondary"
+                      />
+                      Daily Routine
+                    </label>
+                  </div>
+                </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h2 className="text-xl font-bold text-slate-800 mb-4">Add Task</h2>
-            <form onSubmit={handleAdd} className="flex flex-col gap-3">
-              <input 
-                type="text" 
-                placeholder="e.g. Study Programming" 
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 focus:border-primary-500 outline-none transition-colors"
-                required
-              />
-              <div className="flex gap-2">
-                <input 
-                  type="number" 
-                  min="0.5" step="0.5" 
-                  placeholder="Hours" 
-                  value={estimatedHours}
-                  onChange={(e) => setEstimatedHours(Number(e.target.value))}
-                  className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 focus:border-primary-500 outline-none transition-colors"
-                  required
-                />
-                <button type="submit" className="bg-primary-600 hover:bg-primary-700 text-white p-3 rounded-xl flex items-center justify-center transition-colors shadow-lg shadow-primary-600/20">
-                  <Plus className="w-5 h-5" />
+                {/* Daily Condition */}
+                <div>
+                  <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2 block">Daily Condition / Notes</span>
+                  <textarea 
+                    placeholder="e.g., I'm feeling tired today..." 
+                    value={dailyCondition}
+                    onChange={(e) => setDailyCondition(e.target.value)}
+                    onBlur={() => saveDailyCondition(dailyCondition)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded p-4 font-body text-sm text-on-surface placeholder:text-zinc-600 outline-none focus:border-secondary/50 min-h-[80px] resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={generateSchedule}
+                    disabled={loading || tasks.filter(t => t.status === 'pending').length === 0}
+                    className="bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary py-4 font-headline font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined">auto_awesome</span>
+                    {loading ? 'GENERATING...' : 'GENERATE_AI_SCHEDULE'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => navigate('/calendar', { state: { date: targetDate } })}
+                    className="bg-surface-container-lowest hover:bg-surface-container hover:text-on-surface border border-outline-variant/20 text-zinc-400 py-4 font-headline font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-3"
+                  >
+                    <span className="material-symbols-outlined">visibility</span>
+                    VIEW_SCHEDULE
+                  </button>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-primary text-on-primary py-6 rounded-lg font-headline font-black text-xl tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(221,183,255,0.3)] hover:shadow-[0_0_40px_rgba(221,183,255,0.5)] transition-all flex items-center justify-center gap-4 group"
+                >
+                  INITIALIZE_TASK
+                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
                 </button>
-              </div>
-              <label className="flex items-center gap-2 mt-1 text-slate-600 font-semibold cursor-pointer select-none">
-                <input type="checkbox" checked={isDaily} onChange={(e) => setIsDaily(e.target.checked)} className="w-5 h-5 rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer"/>
-                Repeat Daily <span className="text-xs text-slate-400 font-normal">(Permanent Habit)</span>
-              </label>
-            </form>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Daily Condition</h2>
-            {dailyMood && (
-              <div className="mb-3 text-sm font-semibold text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200 inline-block">
-                Recorded Mood: <span className="text-primary-600 font-bold">{dailyMood}</span>
-              </div>
-            )}
-            <textarea 
-              placeholder="e.g., I'm feeling tired today, please keep work light..." 
-              value={dailyCondition}
-              onChange={(e) => setDailyCondition(e.target.value)}
-              onBlur={() => saveDailyCondition(dailyCondition)}
-              className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 focus:border-primary-500 outline-none transition-colors min-h-[100px] resize-none text-slate-700 font-medium"
-            />
-          </div>
-
-          <button 
-            onClick={generateSchedule}
-            disabled={loading || tasks.filter(t => t.status === 'pending').length === 0}
-            className={`w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/20 ${(loading || tasks.filter(t => t.status === 'pending').length === 0) && 'opacity-70 cursor-not-allowed'}`}
-          >
-            <RefreshCcw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Generating AI Schedule...' : 'Generate Today\'s AI Schedule'}
-          </button>
-
-          <button 
-            onClick={() => navigate('/calendar', { state: { date: targetDate } })}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-2xl transition-all shadow-sm"
-          >
-            View Existing Schedule
-          </button>
-        </div>
-
-        <div className="md:col-span-2 flex flex-col gap-6">
-          {/* Backlog Box */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col max-h-[50vh]">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-slate-800">Your Backlog <span className="text-sm font-normal text-slate-400 ml-2">({targetDate})</span></h2>
-              <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-bold">
-                {tasks.filter(t => t.status === 'pending').length} Pending
-              </span>
+              </form>
             </div>
-            
-            <div className="flex-1 overflow-y-auto p-6 space-y-3">
-              {tasks.map(t => (
-                <div key={t.id} className={`p-4 rounded-xl border transition-all ${t.status === 'completed' ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200 shadow-sm hover:border-primary-200'}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <h4 className={`font-semibold ${t.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>{t.task}</h4>
-                      <div className="flex gap-2 mt-2">
-                        <span className="text-xs font-semibold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg">Duration: {t.duration}h</span>
-                        {t.priority !== 'normal' && <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg">Priority: {t.priority}</span>}
+
+            {/* Daily Condition Metrics */}
+            <div className="bg-surface-container-low p-6 rounded-xl rounded-br-sm hud-border-purple relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
+                <span className="material-symbols-outlined text-8xl">analytics</span>
+              </div>
+              <h3 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm text-primary">monitor_heart</span>
+                Daily Condition Metrics
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Energy Core</span>
+                      <span className="font-headline font-bold text-[10px] text-tertiary">84%</span>
+                    </div>
+                    <div className="h-2 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+                      <div className="h-full bg-tertiary w-[84%]"></div>
+                      <div className="h-full bg-zinc-800 w-[16%]"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Focus Level</span>
+                      <span className="font-headline font-bold text-[10px] text-secondary">62%</span>
+                    </div>
+                    <div className="h-2 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+                      <div className="h-full bg-secondary w-[62%]"></div>
+                      <div className="h-full bg-zinc-800 w-[38%]"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col justify-between">
+                  <div className="flex items-center gap-4 bg-surface-container-lowest p-4 rounded border border-outline-variant/10">
+                    <div className="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+                      <span className="material-symbols-outlined text-3xl">sentiment_very_satisfied</span>
+                    </div>
+                    <div>
+                      <p className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Mood Profile</p>
+                      <p className="font-headline font-bold text-on-surface uppercase tracking-tighter">{dailyMood ? dailyMood.toUpperCase() : 'NOT_RECORDED'}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest block mb-2">Condition Note</span>
+                    <p className="text-xs text-zinc-400 font-body leading-relaxed border-l-2 border-primary pl-4 italic">
+                      {dailyCondition || 'No condition notes recorded for this date.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Panel: HUD Backlog & Habits */}
+          <div className="col-span-12 lg:col-span-5 space-y-8">
+            {/* Backlog Section */}
+            <div className="bg-surface-container-low border border-white/5 rounded-xl rounded-tl-sm flex flex-col h-[300px]">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-surface-container-high/30">
+                <h3 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-300 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm text-secondary">inventory_2</span>
+                  Your Backlog
+                </h3>
+                <span className="bg-zinc-800 text-zinc-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                  {tasks.filter(t => t.status === 'pending').length} Pending
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {tasks.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                    <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-800 flex items-center justify-center mb-4">
+                      <span className="material-symbols-outlined text-zinc-800 text-3xl">inbox</span>
+                    </div>
+                    <p className="font-headline text-zinc-600 uppercase text-[10px] tracking-widest font-bold">CLEAN_SLATE</p>
+                    <p className="text-[10px] text-zinc-700 mt-1 max-w-[200px]">NO PENDING TASKS DETECTED IN LOCAL REPOSITORY</p>
+                  </div>
+                ) : (
+                  tasks.map(t => (
+                    <div key={t.id} className={`p-4 rounded-lg border transition-all flex items-center justify-between ${t.status === 'completed' ? 'bg-surface-container-lowest/50 border-white/5 opacity-60' : 'bg-surface-container-lowest border-white/10'}`}>
+                      <div>
+                        <h4 className={`font-semibold text-sm ${t.status === 'completed' ? 'line-through text-zinc-500' : 'text-on-surface'}`}>{t.task}</h4>
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Duration: {t.duration}h</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => handleToggleComplete(t.id, t.status)}
+                          className={`p-2 rounded border transition-colors ${t.status === 'completed' ? 'bg-tertiary border-tertiary text-on-tertiary' : 'border-zinc-700 text-zinc-500 hover:text-tertiary hover:border-tertiary'}`}
+                        >
+                          <span className="material-symbols-outlined text-lg">check</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(t.id)}
+                          className="p-2 border border-transparent text-zinc-500 hover:bg-error/10 hover:text-error rounded transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-lg">delete</span>
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => handleToggleComplete(t.id, t.status)}
-                        className={`p-2.5 rounded-full border transition-colors ${t.status === 'completed' ? 'bg-green-500 border-green-500 text-white' : 'border-slate-200 text-slate-400 hover:text-green-500 hover:border-green-500'}`}
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(t.id)}
-                        className="p-2.5 rounded-full border border-transparent text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {tasks.length === 0 && (
-                <div className="text-center text-slate-400 py-10 flex flex-col items-center">
-                  <div className="bg-slate-100 p-4 rounded-full mb-4">
-                    <Check className="w-8 h-8 text-slate-300" />
-                  </div>
-                  <p className="font-semibold text-lg">No one-off tasks today.</p>
-                </div>
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Daily Habits Box */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col max-h-[30vh]">
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-slate-800">Daily Habits</h2>
-              <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">
-                {routines.length} Fixed
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {routines.map(r => {
-                const isCompleted = completedRoutines.includes(r.id);
-                return (
-                  <div key={r.id} className={`p-3 rounded-xl border transition-all flex items-center justify-between ${isCompleted ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200'}`}>
-                    <div>
-                      <h4 className={`font-semibold ${isCompleted ? 'line-through text-slate-400' : 'text-slate-700'}`}>{r.task}</h4>
-                      <span className="text-xs font-semibold text-slate-500">Duration: {r.duration}h</span>
+            {/* Habits Section */}
+            <div className="bg-surface-container-low border border-white/5 rounded-xl rounded-tl-sm flex flex-col h-[300px]">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-surface-container-high/30">
+                <h3 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-300 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm text-tertiary">cached</span>
+                  Daily Habits
+                </h3>
+                <span className="bg-zinc-800 text-zinc-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                  {routines.length} Fixed
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {routines.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                    <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-800 flex items-center justify-center mb-4">
+                      <span className="material-symbols-outlined text-zinc-800 text-3xl">refresh</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => handleToggleRoutineComplete(r.id)}
-                        className={`p-2 rounded-full border transition-colors ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-slate-200 text-slate-400 hover:text-green-500 hover:border-green-500'}`}
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDeleteRoutine(r.id)} className="p-2 border border-transparent text-slate-400 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <p className="font-headline text-zinc-600 uppercase text-[10px] tracking-widest font-bold">ZERO_ROUTINES</p>
+                    <p className="text-[10px] text-zinc-700 mt-1 max-w-[200px]">STABILIZE YOUR HUD BY DEFINING RECURRING PROTOCOLS</p>
                   </div>
-                );
-              })}
-              {routines.length === 0 && (
-                <div className="text-center text-slate-400 py-6 text-sm">
-                  Add a task and check "Repeat Daily" to save a habit.
-                </div>
-              )}
+                ) : (
+                  routines.map(r => {
+                    const isCompleted = completedRoutines.includes(r.id);
+                    return (
+                      <div key={r.id} className={`p-4 rounded-lg border transition-all flex items-center justify-between ${isCompleted ? 'bg-surface-container-lowest/50 border-white/5 opacity-60' : 'bg-surface-container-lowest border-white/10'}`}>
+                        <div>
+                          <h4 className={`font-semibold text-sm ${isCompleted ? 'line-through text-zinc-500' : 'text-on-surface'}`}>{r.task}</h4>
+                          <span className="text-[10px] font-semibold text-zinc-500 uppercase">Duration: {r.duration}h</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleToggleRoutineComplete(r.id)}
+                            className={`p-2 rounded border transition-colors ${isCompleted ? 'bg-tertiary border-tertiary text-on-tertiary' : 'border-zinc-700 text-zinc-500 hover:text-tertiary hover:border-tertiary'}`}
+                          >
+                            <span className="material-symbols-outlined text-lg">check</span>
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteRoutine(r.id)}
+                            className="p-2 border border-transparent text-zinc-500 hover:bg-error/10 hover:text-error rounded transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Quick Stats Mini-HUD */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-surface-container-lowest p-4 border border-outline-variant/10 rounded">
+                <span className="font-label text-[9px] text-zinc-500 uppercase block mb-1">Pending Tasks</span>
+                <span className="font-headline font-bold text-xl text-secondary">{tasks.filter(t => t.status === 'pending').length}</span>
+              </div>
+              <div className="bg-surface-container-lowest p-4 border border-outline-variant/10 rounded">
+                <span className="font-label text-[9px] text-zinc-500 uppercase block mb-1">Routines</span>
+                <span className="font-headline font-bold text-xl text-tertiary">{routines.length}</span>
+              </div>
             </div>
           </div>
         </div>
-
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

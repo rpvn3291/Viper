@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEON_OS // TACTICAL_HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface": "#131313",
+              "on-secondary-container": "#00424e",
+              "error": "#ffb4ab",
+              "surface-container-low": "#1c1b1b",
+              "secondary": "#4cd7f6",
+              "outline-variant": "#4d4354",
+              "outline": "#988d9f",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-surface-variant": "#cfc2d6",
+              "tertiary-container": "#00a572",
+              "on-primary": "#490080",
+              "primary-fixed-dim": "#ddb7ff",
+              "inverse-primary": "#842bd2",
+              "surface-container": "#201f1f",
+              "on-primary-fixed-variant": "#6900b3",
+              "surface-dim": "#131313",
+              "on-secondary": "#003640",
+              "on-tertiary-container": "#00311f",
+              "on-background": "#e5e2e1",
+              "surface-tint": "#ddb7ff",
+              "inverse-on-surface": "#313030",
+              "on-tertiary": "#003824",
+              "surface-variant": "#353534",
+              "surface-container-lowest": "#0e0e0e",
+              "error-container": "#93000a",
+              "surface-container-highest": "#353534",
+              "on-secondary-fixed": "#001f26",
+              "on-primary-fixed": "#2c0051",
+              "inverse-surface": "#e5e2e1",
+              "primary": "#ddb7ff",
+              "on-secondary-fixed-variant": "#004e5c",
+              "tertiary-fixed-dim": "#4edea3",
+              "secondary-container": "#03b5d3",
+              "surface-container-high": "#2a2a2a",
+              "secondary-fixed-dim": "#4cd7f6",
+              "primary-container": "#b76dff",
+              "on-primary-container": "#400071",
+              "tertiary": "#4edea3",
+              "on-error": "#690005",
+              "background": "#131313",
+              "secondary-fixed": "#acedff",
+              "on-tertiary-fixed": "#002113",
+              "on-error-container": "#ffdad6",
+              "tertiary-fixed": "#6ffbbe",
+              "on-surface": "#e5e2e1",
+              "surface-bright": "#393939",
+              "primary-fixed": "#f0dbff"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .hud-border-cyan {
+        border: 1px solid rgba(76, 215, 246, 0.15);
+      }
+      .hud-border-purple {
+        border: 1px solid rgba(221, 183, 255, 0.15);
+      }
+      .light-leak-cyan {
+        background: linear-gradient(90deg, transparent, rgba(76, 215, 246, 0.1), transparent);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30 selection:text-primary">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 bg-[#131313] dark:bg-zinc-950 h-screen w-64 border-r border-white/5 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+<div class="p-6">
+<h1 class="text-2xl font-bold tracking-tighter text-purple-500 font-headline">NEON_OS</h1>
+<p class="font-headline tracking-wider uppercase text-[10px] text-zinc-500 mt-1">TACTICAL HUD v1.0</p>
+</div>
+<nav class="flex-1 px-4 mt-8 space-y-2">
+<!-- Dashboard Tab -->
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 transition-colors duration-100 font-label text-xs font-bold uppercase tracking-widest hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Dashboard</span>
+</a>
+<!-- Schedule Tab (ACTIVE) -->
+<a class="flex items-center gap-3 px-4 py-3 text-cyan-400 dark:text-cyan-300 border-r-2 border-cyan-500 bg-cyan-500/10 shadow-[0_0_10px_rgba(34,211,238,0.2)] font-label text-xs font-bold uppercase tracking-widest scale-[0.97]" href="#">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+<span>Schedule</span>
+</a>
+<!-- Calendar Tab -->
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 transition-colors duration-100 font-label text-xs font-bold uppercase tracking-widest hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span>Calendar</span>
+</a>
+<!-- Settings Tab -->
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-zinc-300 transition-colors duration-100 font-label text-xs font-bold uppercase tracking-widest hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<button class="w-full bg-primary text-on-primary py-3 font-headline font-bold text-xs tracking-widest uppercase rounded shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] transition-all active:scale-[0.97]">
+                DEPLOY MISSION
+            </button>
+<div class="mt-6 flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Cyberpunk operator portrait with digital glitch overlays and neon face paint" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTQ_AnncrnkAHqk-nBj75tSFAASRMLQePvPlgCKkTmiSHS0s5e5n7EiwS-k5IySIMYiQVgEeM4y77Ml4FqIAJC1Guz7bdBdB-KH8ApwbeJqv3Zdcx9yjIBxC_g272egFRdA1VtBwTFiX5XFC7hceTmTTKaIPz3B5vgngrZjK5URUfYSmhmvigFMQDWSFt4ySosxdPKV1pmAAXTK__r_8PAM67VOV1cXf4LaGzGsiPIclFwOBugfH5qymbDZjFvKQWxOHMa8dJWZ3Q"/>
+</div>
+<div class="text-[10px]">
+<p class="text-on-surface font-bold">OPERATOR_01</p>
+<p class="text-tertiary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+                        ONLINE
+                    </p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 z-30 bg-[#131313]/80 backdrop-blur-xl dark:bg-zinc-950/80 border-b border-white/5">
+<div class="flex items-center gap-6">
+<span class="font-headline text-sm tracking-tight text-zinc-500">TACTICAL_HUD / <span class="text-primary font-bold">SCHEDULER</span></span>
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-zinc-500 group-focus-within:text-secondary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+</span>
+<input class="bg-surface-container-lowest border-none text-[10px] pl-10 pr-4 py-1.5 w-64 font-headline tracking-widest uppercase focus:ring-1 focus:ring-secondary/50 rounded-sm" placeholder="EXECUTE_COMMAND..." type="text"/>
+</div>
+</div>
+<nav class="flex items-center gap-8">
+<a class="font-headline text-sm tracking-tight text-zinc-400 hover:text-cyan-400 transition-all duration-100" href="#">Sectors</a>
+<a class="font-headline text-sm tracking-tight text-purple-500 font-bold border-b-2 border-purple-500" href="#">Telemetry</a>
+<a class="font-headline text-sm tracking-tight text-zinc-400 hover:text-cyan-400 transition-all duration-100" href="#">Comms</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-zinc-400 hover:text-cyan-400 transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications_active">notifications_active</span>
+</button>
+<button class="text-zinc-400 hover:text-cyan-400 transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="sensors">sensors</span>
+</button>
+<button class="text-zinc-400 hover:text-cyan-400 transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="terminal">terminal</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-64 mt-16 p-8 min-h-[calc(100vh-64px)]">
+<div class="grid grid-cols-12 gap-8 max-w-7xl mx-auto">
+<!-- Left Panel: Task Engine -->
+<div class="col-span-12 lg:col-span-7 space-y-8">
+<!-- Date and Task Input Section -->
+<div class="bg-surface-container-low p-6 rounded-xl rounded-br-sm hud-border-cyan">
+<div class="flex items-center justify-between mb-8">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-1">Target Date</span>
+<div class="flex items-center gap-3 bg-surface-container-lowest px-4 py-2 rounded border border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary" data-icon="calendar_month">calendar_month</span>
+<span class="font-headline font-bold text-lg tracking-widest text-on-surface">01-04-2026</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em]">Operational Status</span>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div>
+<span class="text-tertiary font-headline font-bold text-xs uppercase">READY</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<label class="block">
+<span class="font-label text-[10px] text-secondary uppercase tracking-[0.2em] mb-2 block">Initialize Mission Task</span>
+<input class="w-full bg-surface-container-lowest border-none focus:ring-0 focus:border-b-2 focus:border-secondary border-b-2 border-outline-variant/10 p-4 font-headline text-lg tracking-tight placeholder:text-zinc-700" placeholder="ENTER TASK PARAMETERS..." type="text"/>
+</label>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary py-4 font-headline font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+                                GENERATE_TODAY'S_AI_SCHEDULE
+                            </button>
+<button class="bg-surface-container-lowest hover:bg-surface-container hover:text-on-surface border border-outline-variant/20 text-zinc-400 py-4 font-headline font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+                                VIEW_EXISTING_SCHEDULE
+                            </button>
+</div>
+<button class="w-full bg-primary text-on-primary py-6 rounded-lg font-headline font-black text-xl tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(221,183,255,0.3)] hover:shadow-[0_0_40px_rgba(221,183,255,0.5)] transition-all flex items-center justify-center gap-4 group">
+                            INITIALIZE_TASK
+                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="rocket_launch">rocket_launch</span>
+</button>
+</div>
+</div>
+<!-- Daily Condition Section -->
+<div class="bg-surface-container-low p-6 rounded-xl rounded-br-sm hud-border-purple relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-5">
+<span class="material-symbols-outlined text-8xl" data-icon="analytics">analytics</span>
+</div>
+<h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="monitor_heart">monitor_heart</span>
+                        Daily Condition Metrics
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<div>
+<div class="flex justify-between mb-2">
+<span class="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Energy Core</span>
+<span class="font-headline font-bold text-[10px] text-tertiary">84%</span>
+</div>
+<div class="h-2 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-tertiary w-[84%]"></div>
+<div class="h-full bg-zinc-800 w-[16%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-2">
+<span class="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Focus Level</span>
+<span class="font-headline font-bold text-[10px] text-secondary">62%</span>
+</div>
+<div class="h-2 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-secondary w-[62%]"></div>
+<div class="h-full bg-zinc-800 w-[38%]"></div>
+</div>
+</div>
+</div>
+<div class="flex flex-col justify-between">
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded border border-outline-variant/10">
+<div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-3xl" data-icon="sentiment_very_satisfied">sentiment_very_satisfied</span>
+</div>
+<div>
+<p class="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Mood Profile</p>
+<p class="font-headline font-bold text-on-surface uppercase tracking-tighter">OPTIMIZED_HAPPY</p>
+</div>
+</div>
+<div class="mt-4">
+<span class="font-label text-[10px] text-zinc-500 uppercase tracking-widest block mb-2">Condition Note</span>
+<p class="text-xs text-zinc-400 font-body leading-relaxed border-l-2 border-primary pl-4 italic">
+                                    Operator reports high cognitive clarity after 07:00 deploy. Recommend deep work cycles for primary mission objective.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Panel: HUD Backlog & Habits -->
+<div class="col-span-12 lg:col-span-5 space-y-8">
+<!-- Backlog Section -->
+<div class="bg-surface-container-low border border-white/5 rounded-xl rounded-tl-sm flex flex-col h-[300px]">
+<div class="p-6 border-b border-white/5 flex justify-between items-center bg-surface-container-high/30">
+<h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-300 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary" data-icon="inventory_2">inventory_2</span>
+                            Your Backlog
+                        </h3>
+<span class="bg-zinc-800 text-zinc-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase">0 Pending</span>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+<div class="w-16 h-16 rounded-full border-2 border-dashed border-zinc-800 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-zinc-800 text-3xl" data-icon="inbox">inbox</span>
+</div>
+<p class="font-headline text-zinc-600 uppercase text-[10px] tracking-widest font-bold">CLEAN_SLATE</p>
+<p class="text-[10px] text-zinc-700 mt-1 max-w-[200px]">NO PENDING TASKS DETECTED IN LOCAL REPOSITORY</p>
+</div>
+</div>
+<!-- Habits Section -->
+<div class="bg-surface-container-low border border-white/5 rounded-xl rounded-tl-sm flex flex-col h-[300px]">
+<div class="p-6 border-b border-white/5 flex justify-between items-center bg-surface-container-high/30">
+<h3 class="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-300 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-tertiary" data-icon="cached">cached</span>
+                            Daily Habits
+                        </h3>
+<span class="bg-zinc-800 text-zinc-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase">0 Fixed</span>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+<div class="w-16 h-16 rounded-full border-2 border-dashed border-zinc-800 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-zinc-800 text-3xl" data-icon="refresh">refresh</span>
+</div>
+<p class="font-headline text-zinc-600 uppercase text-[10px] tracking-widest font-bold">ZERO_ROUTINES</p>
+<p class="text-[10px] text-zinc-700 mt-1 max-w-[200px]">STABILIZE YOUR HUD BY DEFINING RECURRING PROTOCOLS</p>
+</div>
+</div>
+<!-- Quick Stats Mini-HUD -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-4 border border-outline-variant/10 rounded">
+<span class="font-label text-[9px] text-zinc-500 uppercase block mb-1">Uptime</span>
+<span class="font-headline font-bold text-xl text-secondary">14.2h</span>
+</div>
+<div class="bg-surface-container-lowest p-4 border border-outline-variant/10 rounded">
+<span class="font-label text-[9px] text-zinc-500 uppercase block mb-1">Efficiency</span>
+<span class="font-headline font-bold text-xl text-tertiary">98.2%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- UI Decoration: Floating Telemetry Elements -->
+<div class="fixed bottom-8 right-8 z-50 pointer-events-none">
+<div class="bg-surface-variant/60 backdrop-blur-md p-4 rounded-lg border border-outline-variant/20 shadow-2xl">
+<div class="flex items-center gap-4">
+<div class="space-y-1">
+<div class="h-1 w-12 bg-primary/30"></div>
+<div class="h-1 w-8 bg-secondary/30"></div>
+<div class="h-1 w-10 bg-tertiary/30"></div>
+</div>
+<div class="font-headline text-[10px] font-bold text-zinc-500">
+                    S_01 // ACTIVE_SYNC
+                </div>
+</div>
+</div>
+</div>
+</body></html>
