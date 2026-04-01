@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, doc, getDoc, setDoc, addDoc, serverTimestamp, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { GoogleGenAI } from '@google/genai';
 import { Plus, Check, Trash2, RefreshCcw, Settings, LogOut } from 'lucide-react';
 
@@ -208,6 +208,9 @@ const TasksPage = () => {
         })).slice(0, 10)
       };
 
+      const parsedTargetDate = parseISO(targetDate);
+      const isWeekend = parsedTargetDate.getDay() === 0 || parsedTargetDate.getDay() === 6;
+
       const prompt = `
         You are an expert AI Life Scheduler. Analyze the following user profile, target date, task backlog, daily routines, history, and the user's current condition:
         ${JSON.stringify(payload)}
@@ -223,7 +226,10 @@ const TasksPage = () => {
         RULES:
         1. Base your scheduling around the user's Chronotype ('early-bird', 'night-owl', etc.) and Peak Productivity Time.
         2. NEVER schedule any tasks or routines during the user's sleepTime (start to end).
-        3. NEVER schedule personal tasks during the user's professional blockedTime (but professional/work tasks can be scheduled here if explicit). If there is no specific professional task, do not schedule anything in blockedTime.
+        3. ${isWeekend 
+            ? "Today is a WEEKEND. The user's professional blocked time DOES NOT APPLY. You have full freedom to schedule personal tasks and routines throughout the day (except during sleepTime)." 
+            : "NEVER schedule personal tasks during the user's professional blockedTime (but professional/work tasks can be scheduled here if explicit). If there is no specific professional task, do not schedule anything in blockedTime."
+        }
         4. Do not just list them sequentially. Consider what the task/routine is. For example, align sleep-related routines with sleepTime.
         4. Spread tasks out intelligently if their workStyle is 'pomodoro', or group them if 'deep-work'.
         5. Observe the task history: if they notoriously 'miss' a specific task, try scheduling it during their Peak Productivity Time.
