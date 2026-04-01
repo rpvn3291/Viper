@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, doc, getDoc, setDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import TaskSidebar from '../components/TaskSidebar';
 import CalendarGrid from '../components/CalendarGrid';
 
@@ -11,6 +12,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const Dashboard = () => {
   const { currentUser, logOut } = useAuth();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [profile, setProfile] = useState(null);
   const [schedule, setSchedule] = useState([]);
@@ -29,7 +31,12 @@ const Dashboard = () => {
 
     // Get current profile config
     getDoc(doc(db, 'users', currentUser.uid, 'profile', 'config')).then(snap => {
-      if (snap.exists()) setProfile(snap.data());
+      if (snap.exists()) {
+        setProfile(snap.data());
+      } else {
+        // Redirection logic if no profile!
+        navigate('/setup');
+      }
     });
 
     // Listen to today's schedule
