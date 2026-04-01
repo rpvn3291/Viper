@@ -21,6 +21,7 @@ const TasksPage = () => {
   const [routines, setRoutines] = useState([]);
   const [dailyCondition, setDailyCondition] = useState("");
   const [dailyMood, setDailyMood] = useState(null);
+  const [completedRoutines, setCompletedRoutines] = useState([]);
 
   // Initial Fetching
   useEffect(() => {
@@ -69,9 +70,11 @@ const TasksPage = () => {
         if (docSnap.exists()) {
           setDailyCondition(docSnap.data().extraCondition || "");
           setDailyMood(docSnap.data().mood || null);
+          setCompletedRoutines(docSnap.data().completedRoutines || []);
         } else {
           setDailyCondition("");
           setDailyMood(null);
+          setCompletedRoutines([]);
         }
       } catch (err) {
         console.error(err);
@@ -134,6 +137,23 @@ const TasksPage = () => {
 
   const handleDelete = async (taskId) => {
     await deleteDoc(doc(db, 'users', currentUser.uid, 'tasks', taskId));
+  };
+
+  const handleToggleRoutineComplete = async (routineId) => {
+    if (!currentUser) return;
+    try {
+      const isCompleted = completedRoutines.includes(routineId);
+      const newCompletedRoutines = isCompleted 
+        ? completedRoutines.filter(id => id !== routineId)
+        : [...completedRoutines, routineId];
+      
+      setCompletedRoutines(newCompletedRoutines);
+
+      const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
+      await setDoc(docRef, { completedRoutines: newCompletedRoutines, updatedAt: serverTimestamp() }, { merge: true });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDeleteRoutine = async (routineId) => {
@@ -431,17 +451,28 @@ const TasksPage = () => {
               </span>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {routines.map(r => (
-                <div key={r.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold text-slate-700">{r.task}</h4>
-                    <span className="text-xs font-semibold text-slate-500">Duration: {r.duration}h</span>
+              {routines.map(r => {
+                const isCompleted = completedRoutines.includes(r.id);
+                return (
+                  <div key={r.id} className={`p-3 rounded-xl border transition-all flex items-center justify-between ${isCompleted ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200'}`}>
+                    <div>
+                      <h4 className={`font-semibold ${isCompleted ? 'line-through text-slate-400' : 'text-slate-700'}`}>{r.task}</h4>
+                      <span className="text-xs font-semibold text-slate-500">Duration: {r.duration}h</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleToggleRoutineComplete(r.id)}
+                        className={`p-2 rounded-full border transition-colors ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-slate-200 text-slate-400 hover:text-green-500 hover:border-green-500'}`}
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDeleteRoutine(r.id)} className="p-2 border border-transparent text-slate-400 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  <button onClick={() => handleDeleteRoutine(r.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
               {routines.length === 0 && (
                 <div className="text-center text-slate-400 py-6 text-sm">
                   Add a task and check "Repeat Daily" to save a habit.
