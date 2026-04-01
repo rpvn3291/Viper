@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { isBefore, startOfToday, parseISO, isValid } from "date-fns";
+import { isBefore, startOfToday, parseISO, isValid, format } from "date-fns";
 
 const Dashboard = () => {
     const { currentUser } = useAuth();
@@ -11,6 +11,8 @@ const Dashboard = () => {
 
     const [missedTasks, setMissedTasks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showMoodModal, setShowMoodModal] = useState(false);
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
 
     useEffect(() => {
         if (!currentUser) return;
@@ -48,11 +50,61 @@ const Dashboard = () => {
             }
         };
 
+        const checkDailyMood = async () => {
+            try {
+                const moodRef = doc(db, "users", currentUser.uid, "dailyContext", todayStr);
+                const moodSnap = await getDoc(moodRef);
+                if (!moodSnap.exists() || !moodSnap.data().mood) {
+                    setShowMoodModal(true);
+                }
+            } catch (err) {
+                console.error("Error checking daily mood:", err);
+            }
+        };
+
         fetchMissedTasks();
-    }, [currentUser]);
+        checkDailyMood();
+    }, [currentUser, todayStr]);
+
+    const handleMoodSelect = async (mood) => {
+        setShowMoodModal(false);
+        try {
+            const moodRef = doc(db, "users", currentUser.uid, "dailyContext", todayStr);
+            await setDoc(moodRef, {
+                mood,
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        } catch (err) {
+            console.error("Error saving mood:", err);
+        }
+    };
 
     return (
-        <div className="p-6 bg-slate-50 min-h-screen">
+        <div className="p-6 bg-slate-50 min-h-screen relative">
+            {/* 🔹 Mood Modal */}
+            {showMoodModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                    <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center transform transition-all">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-2">How are you feeling today?</h2>
+                        <p className="text-slate-500 mb-8 text-sm">We'll use this to optimize your AI schedule.</p>
+                        <div className="flex justify-center gap-3">
+                            <button onClick={() => handleMoodSelect('Happy')} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-50 hover:bg-green-100 transition-colors border border-green-200 w-24">
+                                <span className="text-4xl leading-none">😊</span>
+                                <span className="font-semibold text-green-700 text-sm">Happy</span>
+                            </button>
+                            <button onClick={() => handleMoodSelect('OK')} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-amber-50 hover:bg-amber-100 transition-colors border border-amber-200 w-24">
+                                <span className="text-4xl leading-none">😐</span>
+                                <span className="font-semibold text-amber-700 text-sm">OK</span>
+                            </button>
+                            <button onClick={() => handleMoodSelect('Tired/Sad')} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 w-24">
+                                <span className="text-4xl leading-none">😴</span>
+                                <span className="font-semibold text-blue-700 text-sm">Tired</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* 🔹 Header */}
             <h1 className="text-2xl font-bold">Dashboard</h1>
             <p className="text-sm text-gray-500 mt-1">

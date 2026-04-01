@@ -1,5 +1,5 @@
 export default function Layout({ step, children, onNext, onBack, isLastStep = false }) {
-    const percent = (step / 5) * 100;
+    const percent = (step / 6) * 100;
 
     return (
         <div className="min-h-screen bg-background font-body text-on-surface flex flex-col items-center">
@@ -22,7 +22,7 @@ export default function Layout({ step, children, onNext, onBack, isLastStep = fa
                     </div>
                     <div className="flex flex-col items-end">
                         <span className="text-xs font-label font-semibold text-on-surface-variant uppercase tracking-wider">
-                            Step {step} of 5
+                            Step {step} of 6
                         </span>
                     </div>
                 </div>

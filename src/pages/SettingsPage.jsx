@@ -15,8 +15,10 @@ const SettingsPage = () => {
     peakTime: 'morning',
     preference: 'hard-first',
     availableHours: 6,
-    blockedTimeStart: 10,
+    blockedTimeStart: 9,
     blockedTimeEnd: 17,
+    sleepTimeStart: 22,
+    sleepTimeEnd: 7,
     workStyle: 'deep-work',
     chronotype: 'early-bird',
     hobbies: '',
@@ -35,8 +37,10 @@ const SettingsPage = () => {
               peakTime: data.peakTime || 'morning',
               preference: data.preference || 'hard-first',
               availableHours: data.availableHours || 6,
-              blockedTimeStart: data.blockedTime?.start || 10,
-              blockedTimeEnd: data.blockedTime?.end || 17,
+              blockedTimeStart: data.blockedTime?.start ?? 9,
+              blockedTimeEnd: data.blockedTime?.end ?? 17,
+              sleepTimeStart: data.sleepTime?.start ?? 22,
+              sleepTimeEnd: data.sleepTime?.end ?? 7,
               workStyle: data.workStyle || 'deep-work',
               chronotype: data.chronotype || 'early-bird',
               hobbies: data.hobbies || '',
@@ -68,6 +72,10 @@ const SettingsPage = () => {
         blockedTime: {
           start: Number(formData.blockedTimeStart),
           end: Number(formData.blockedTimeEnd)
+        },
+        sleepTime: {
+          start: Number(formData.sleepTimeStart),
+          end: Number(formData.sleepTimeEnd)
         },
         workStyle: formData.workStyle,
         chronotype: formData.chronotype,
@@ -144,10 +152,10 @@ const SettingsPage = () => {
           </div>
 
           <div className="space-y-4 pt-4 border-t border-slate-100">
-            <h3 className="font-bold text-slate-800">Fixed Blocked Time</h3>
+            <h3 className="font-bold text-slate-800">Professional Work Hours</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Block Start</label>
+                <label className="text-sm font-semibold text-slate-700">Work Start Time</label>
                 <select name="blockedTimeStart" value={formData.blockedTimeStart} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
                   {[...Array(24)].map((_, i) => (
                     <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
@@ -155,8 +163,30 @@ const SettingsPage = () => {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Block End</label>
+                <label className="text-sm font-semibold text-slate-700">Work End Time</label>
                 <select name="blockedTimeEnd" value={formData.blockedTimeEnd} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
+                  {[...Array(24)].map((_, i) => (
+                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <h3 className="font-bold text-slate-800">Sleep Schedule</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Bedtime</label>
+                <select name="sleepTimeStart" value={formData.sleepTimeStart} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
+                  {[...Array(24)].map((_, i) => (
+                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Wake up Time</label>
+                <select name="sleepTimeEnd" value={formData.sleepTimeEnd} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
                   {[...Array(24)].map((_, i) => (
                     <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
                   ))}

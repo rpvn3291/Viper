@@ -19,6 +19,8 @@ const TasksPage = () => {
   const [targetDate, setTargetDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isDaily, setIsDaily] = useState(false);
   const [routines, setRoutines] = useState([]);
+  const [dailyCondition, setDailyCondition] = useState("");
+  const [dailyMood, setDailyMood] = useState(null);
 
   // Initial Fetching
   useEffect(() => {
@@ -59,11 +61,39 @@ const TasksPage = () => {
       setRoutines(rts);
     });
 
+    // Fetch Daily Context (mood & condition) for the target date
+    const fetchDailyContext = async () => {
+      try {
+        const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setDailyCondition(docSnap.data().extraCondition || "");
+          setDailyMood(docSnap.data().mood || null);
+        } else {
+          setDailyCondition("");
+          setDailyMood(null);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchDailyContext();
+
     return () => {
       unsubscribeTasks();
       unsubscribeRoutines();
     };
   }, [currentUser, navigate, targetDate]);
+
+  const saveDailyCondition = async (conditionVal) => {
+    if (!currentUser) return;
+    try {
+      const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
+      await setDoc(docRef, { extraCondition: conditionVal, updatedAt: serverTimestamp() }, { merge: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Task Actions
   const handleAdd = async (e) => {
@@ -136,6 +166,8 @@ const TasksPage = () => {
 
       const payload = {
         targetDate,
+        dailyMood: dailyMood || 'Not specified',
+        extraCondition: dailyCondition || 'None',
         tasks: pendingTasks,
         dailyRoutines: routines.map(r => ({ task: r.task, duration: Number(r.duration) })),
         userProfile: {
@@ -144,6 +176,7 @@ const TasksPage = () => {
           preference: profile.preference,
           availableHours: Number(profile.availableHours),
           blockedTime: profile.blockedTime,
+          sleepTime: profile.sleepTime,
           workStyle: profile.workStyle || 'deep-work',
           chronotype: profile.chronotype || 'early-bird',
           hobbies: profile.hobbies || '',
@@ -156,16 +189,22 @@ const TasksPage = () => {
       };
 
       const prompt = `
-        You are an expert AI Life Scheduler. Analyze the following user profile, task backlog, daily routines, and history:
+        You are an expert AI Life Scheduler. Analyze the following user profile, target date, task backlog, daily routines, history, and the user's current condition:
         ${JSON.stringify(payload)}
+
+        The user has declared their mood for today is: ${dailyMood ? `"${dailyMood}"` : 'neutral'}.
+        They have provided extra instructions/conditions for today: "${dailyCondition ? dailyCondition : 'None'}".
+        You MUST accommodate this mood and condition. For instance, if they are tired, lack interest, or feel sad, you should space out tasks, include ample breaks, or avoid packing the schedule. If they are happy or energetic, you can bunch challenging tasks during peak times.
+
 
         Your job is to act as a calendar engine for the targetDate: ${targetDate}.
         Assign a precise 'start' and 'end' time (in 24-hour decimal format, e.g., 8.5 for 08:30 or 14.25 for 14:15) for every standard task AND every daily routine.
         
         RULES:
         1. Base your scheduling around the user's Chronotype ('early-bird', 'night-owl', etc.) and Peak Productivity Time.
-        2. Never schedule during the user's blockedTime (start to end).
-        3. Do not just list them sequentially. Consider what the task/routine is. For example, if a task is 'Sleep', put it at an appropriate late night or early morning time based on their Chronotype.
+        2. NEVER schedule any tasks or routines during the user's sleepTime (start to end).
+        3. NEVER schedule personal tasks during the user's professional blockedTime (but professional/work tasks can be scheduled here if explicit). If there is no specific professional task, do not schedule anything in blockedTime.
+        4. Do not just list them sequentially. Consider what the task/routine is. For example, align sleep-related routines with sleepTime.
         4. Spread tasks out intelligently if their workStyle is 'pomodoro', or group them if 'deep-work'.
         5. Observe the task history: if they notoriously 'miss' a specific task, try scheduling it during their Peak Productivity Time.
         6. You must schedule EVERY task in the pending backlog PLUS EVERY routine inside the dailyRoutines array.
@@ -299,6 +338,22 @@ const TasksPage = () => {
                 Repeat Daily <span className="text-xs text-slate-400 font-normal">(Permanent Habit)</span>
               </label>
             </form>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Daily Condition</h2>
+            {dailyMood && (
+              <div className="mb-3 text-sm font-semibold text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200 inline-block">
+                Recorded Mood: <span className="text-primary-600 font-bold">{dailyMood}</span>
+              </div>
+            )}
+            <textarea 
+              placeholder="e.g., I'm feeling tired today, please keep work light..." 
+              value={dailyCondition}
+              onChange={(e) => setDailyCondition(e.target.value)}
+              onBlur={() => saveDailyCondition(dailyCondition)}
+              className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 focus:border-primary-500 outline-none transition-colors min-h-[100px] resize-none text-slate-700 font-medium"
+            />
           </div>
 
           <button 

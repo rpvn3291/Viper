@@ -8,6 +8,7 @@ import PeakTimeStep from "../components/steps/PeakTimeStep";
 import PreferenceStep from "../components/steps/PreferenceStep";
 import AvailableHoursStep from "../components/steps/AvailableHoursStep";
 import BlockedTimeStep from "../components/steps/BlockedTimeStep";
+import SleepTimeStep from "../components/steps/SleepTimeStep";
 
 const Questionnaire = () => {
   const { currentUser } = useAuth();
@@ -23,9 +24,13 @@ const Questionnaire = () => {
     peakTime: 'morning',
     preference: 'hard-first',
     availableHours: 6,
-    blockedTime: {
+    sleepTime: {
       start: 22,
       end: 7
+    },
+    blockedTime: {
+      start: 9,
+      end: 17
     }
   });
 
@@ -43,9 +48,13 @@ const Questionnaire = () => {
             peakTime: data.peakTime || 'morning',
             preference: data.preference || 'hard-first',
             availableHours: data.availableHours || 6,
+            sleepTime: {
+              start: data.sleepTime?.start ?? 22,
+              end: data.sleepTime?.end ?? 7
+            },
             blockedTime: {
-              start: data.blockedTime?.start ?? 22,
-              end: data.blockedTime?.end ?? 7
+              start: data.blockedTime?.start ?? 9,
+              end: data.blockedTime?.end ?? 17
             }
           });
 
@@ -77,6 +86,10 @@ const Questionnaire = () => {
         peakTime: formData.peakTime,
         preference: formData.preference,
         availableHours: Number(formData.availableHours),
+        sleepTime: {
+          start: Number(formData.sleepTime.start),
+          end: Number(formData.sleepTime.end)
+        },
         blockedTime: {
           start: Number(formData.blockedTime.start),
           end: Number(formData.blockedTime.end)
@@ -137,6 +150,15 @@ const Questionnaire = () => {
       )}
 
       {step === 5 && (
+        <SleepTimeStep
+          form={formData}
+          setForm={setFormData}
+          next={nextStep}
+          back={prevStep}
+        />
+      )}
+
+      {step === 6 && (
         <BlockedTimeStep
           form={formData}
           setForm={setFormData}
