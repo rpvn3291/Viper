@@ -391,35 +391,64 @@ const TasksPage = () => {
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between mb-2">
-                      <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Energy Core</span>
-                      <span className="font-headline font-bold text-[10px] text-tertiary">84%</span>
+                      <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Energy Level</span>
+                      <span className="font-headline font-bold text-[10px] text-tertiary">
+                        {dailyMood === 'Happy' ? '90%' : dailyMood === 'OK' ? '65%' : '40%'}
+                      </span>
                     </div>
                     <div className="h-2 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
-                      <div className="h-full bg-tertiary w-[84%]"></div>
-                      <div className="h-full bg-zinc-800 w-[16%]"></div>
+                      <div 
+                        className="h-full bg-tertiary transition-all duration-500" 
+                        style={{ width: dailyMood === 'Happy' ? '90%' : dailyMood === 'OK' ? '65%' : '40%' }}
+                      ></div>
+                      <div 
+                        className="h-full bg-zinc-800 transition-all duration-500" 
+                        style={{ width: dailyMood === 'Happy' ? '10%' : dailyMood === 'OK' ? '35%' : '60%' }}
+                      ></div>
                     </div>
                   </div>
                   <div>
                     <div className="flex justify-between mb-2">
-                      <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Focus Level</span>
-                      <span className="font-headline font-bold text-[10px] text-secondary">62%</span>
+                      <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Focus Capacity</span>
+                      <span className="font-headline font-bold text-[10px] text-secondary">
+                        {dailyMood === 'Happy' ? '85%' : dailyMood === 'OK' ? '60%' : '35%'}
+                      </span>
                     </div>
                     <div className="h-2 bg-surface-container-lowest rounded-full overflow-hidden flex gap-0.5">
-                      <div className="h-full bg-secondary w-[62%]"></div>
-                      <div className="h-full bg-zinc-800 w-[38%]"></div>
+                      <div 
+                        className="h-full bg-secondary transition-all duration-500" 
+                        style={{ width: dailyMood === 'Happy' ? '85%' : dailyMood === 'OK' ? '60%' : '35%' }}
+                      ></div>
+                      <div 
+                        className="h-full bg-zinc-800 transition-all duration-500" 
+                        style={{ width: dailyMood === 'Happy' ? '15%' : dailyMood === 'OK' ? '40%' : '65%' }}
+                      ></div>
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-col justify-between">
-                  <div className="flex items-center gap-4 bg-surface-container-lowest p-4 rounded border border-outline-variant/10">
-                    <div className="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
-                      <span className="material-symbols-outlined text-3xl">sentiment_very_satisfied</span>
-                    </div>
-                    <div>
-                      <p className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Mood Profile</p>
-                      <p className="font-headline font-bold text-on-surface uppercase tracking-tighter">{dailyMood ? dailyMood.toUpperCase() : 'NOT_RECORDED'}</p>
-                    </div>
+                  <div 
+                  onClick={() => {
+                    const moods = ['Happy', 'OK', 'Tired/Sad'];
+                    const currentIndex = moods.indexOf(dailyMood);
+                    const nextMood = moods[(currentIndex + 1) % moods.length];
+                    setDailyMood(nextMood);
+                    const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
+                    setDoc(docRef, { mood: nextMood, updatedAt: serverTimestamp() }, { merge: true });
+                  }}
+                  className="flex items-center gap-4 bg-surface-container-lowest p-4 rounded border border-outline-variant/10 cursor-pointer hover:border-tertiary/50 transition-colors group"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:bg-tertiary/20 transition-colors">
+                    <span className="material-symbols-outlined text-3xl">
+                      {dailyMood === 'Happy' ? 'sentiment_very_satisfied' : dailyMood === 'OK' ? 'sentiment_neutral' : 'sentiment_dissatisfied'}
+                    </span>
                   </div>
+                  <div className="flex-1">
+                    <p className="font-label text-[10px] text-zinc-500 uppercase tracking-widest">Mood Profile (Click to Change)</p>
+                    <p className="font-headline font-bold text-on-surface uppercase tracking-tighter">{dailyMood ? dailyMood.toUpperCase() : 'NOT_RECORDED'}</p>
+                  </div>
+                  <span className="material-symbols-outlined text-zinc-600 group-hover:text-tertiary transition-colors">edit</span>
+                </div>
                   <div className="mt-4">
                     <span className="font-label text-[10px] text-zinc-500 uppercase tracking-widest block mb-2">Condition Note</span>
                     <p className="text-xs text-zinc-400 font-body leading-relaxed border-l-2 border-primary pl-4 italic">

@@ -11,6 +11,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     const [missedTasks, setMissedTasks] = useState([]);
+    const [todayStats, setTodayStats] = useState({ total: 0, completed: 0 });
     const [loading, setLoading] = useState(true);
     const [showMoodModal, setShowMoodModal] = useState(false);
     const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -18,7 +19,7 @@ const Dashboard = () => {
     useEffect(() => {
         if (!currentUser) return;
 
-        const fetchMissedTasks = async () => {
+        const fetchTasks = async () => {
             try {
                 setLoading(true);
 
@@ -28,20 +29,30 @@ const Dashboard = () => {
 
                 const today = startOfToday();
                 let missed = [];
+                let todayTotal = 0;
+                let todayCompleted = 0;
 
                 snapshot.forEach((docSnap) => {
                     const date = parseISO(docSnap.id);
                     if (!isValid(date)) return;
                     const items = docSnap.data().items || [];
+                    
                     if (isBefore(date, today)) {
                         const incomplete = items.filter((t) => !t.completed);
                         missed.push(...incomplete);
                     }
+                    
+                    // Count today's tasks
+                    if (format(date, 'yyyy-MM-dd') === todayStr) {
+                        todayTotal = items.length;
+                        todayCompleted = items.filter((t) => t.completed).length;
+                    }
                 });
 
                 setMissedTasks(missed);
+                setTodayStats({ total: todayTotal, completed: todayCompleted });
             } catch (err) {
-                console.error("Error fetching missed tasks:", err);
+                console.error("Error fetching tasks:", err);
             } finally {
                 setLoading(false);
             }
@@ -59,7 +70,7 @@ const Dashboard = () => {
             }
         };
 
-        fetchMissedTasks();
+        fetchTasks();
         checkDailyMood();
     }, [currentUser, todayStr]);
 
@@ -106,8 +117,13 @@ const Dashboard = () => {
                 <div className="max-w-7xl mx-auto">
                     {/* Dashboard Header */}
                     <div className="mb-12">
-                        <h1 className="text-4xl font-extrabold font-headline text-white tracking-tight mb-2">Dashboard</h1>
-                        <p className="text-zinc-400 font-medium text-sm">AI that plans your success.</p>
+                        <h1 className="font-headline text-white tracking-tight mb-2 flex items-baseline gap-2">
+                            <span className="text-zinc-500 text-lg font-light italic">Welcome to</span>
+                            <span className="text-4xl font-black bg-gradient-to-r from-primary via-secondary to-tertiary bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(221,183,255,0.3)]">VIPER</span>
+                            <span className="text-3xl font-medium text-zinc-300 tracking-[0.1em]">PLANNER</span>
+                            <span className="text-primary text-3xl">!</span>
+                        </h1>
+                        <p className="text-zinc-400 font-medium text-sm mt-3 ml-1">AI that plans your success.</p>
                     </div>
 
                     {/* Main Grid */}
@@ -117,34 +133,47 @@ const Dashboard = () => {
                             {/* Subtle Background Glow */}
                             <div className="absolute -top-24 -right-24 w-64 h-64 bg-secondary/10 blur-[100px] rounded-full"></div>
                             <div className="w-full flex justify-between items-center mb-10 relative z-10">
-                                <h3 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-400">Efficiency Telemetry</h3>
+                                <h3 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-400">Today's Performance</h3>
                                 <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
-                                    <span className="text-[10px] font-bold text-zinc-300">LIVE_DATA</span>
+                                    <span className="text-[10px] font-bold text-zinc-300">LIVE</span>
                                 </div>
                             </div>
                             {/* Visual Gauge */}
                             <div className="relative w-72 h-72 flex items-center justify-center mb-4">
                                 <svg className="w-full h-full -rotate-90">
                                     <circle className="text-white/5" cx="144" cy="144" fill="transparent" r="130" stroke="currentColor" strokeWidth="8"></circle>
-                                    <circle className="text-secondary progress-ring-glow" cx="144" cy="144" fill="transparent" r="130" stroke="currentColor" strokeDasharray="816" strokeDashoffset="130" strokeLinecap="round" strokeWidth="12"></circle>
+                                    <circle 
+                                        className="text-secondary progress-ring-glow" 
+                                        cx="144" cy="144" fill="transparent" r="130" 
+                                        stroke="currentColor" 
+                                        strokeDasharray="816" 
+                                        strokeDashoffset={todayStats.total === 0 ? 0 : 816 - (816 * (todayStats.completed / todayStats.total))} 
+                                        strokeLinecap="round" 
+                                        strokeWidth="12"
+                                    ></circle>
                                 </svg>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                    <span className="text-7xl font-extrabold font-headline text-white tracking-tighter text-glow-cyan">84<span className="text-secondary text-3xl font-bold ml-1">%</span></span>
-                                    <span className="font-medium text-[11px] text-zinc-400 uppercase tracking-[0.3em] mt-3">Peak Performance</span>
+                                    <span className="text-7xl font-extrabold font-headline text-white tracking-tighter text-glow-cyan">
+                                        {todayStats.total === 0 ? 100 : Math.round((todayStats.completed / todayStats.total) * 100)}
+                                        <span className="text-secondary text-3xl font-bold ml-1">%</span>
+                                    </span>
+                                    <span className="font-medium text-[11px] text-zinc-400 uppercase tracking-[0.3em] mt-3">
+                                        {todayStats.completed}/{todayStats.total} Tasks Done
+                                    </span>
                                 </div>
                             </div>
                             <div className="mt-12 grid grid-cols-3 gap-16 w-full max-w-xl relative z-10">
                                 <div className="text-center">
-                                    <p className="text-white font-headline font-bold text-2xl mb-1">{Math.round(((missedTasks.length > 0 ? 0 : 1) * 100))}<span className="text-zinc-500 text-sm ml-1">%</span></p>
-                                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Today's Performance</p>
+                                    <p className="text-white font-headline font-bold text-2xl mb-1">{todayStats.completed}<span className="text-zinc-500 text-sm ml-1"></span></p>
+                                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Completed</p>
                                 </div>
                                 <div className="text-center border-x border-white/5 px-4">
-                                    <p className="text-tertiary font-headline font-bold text-2xl mb-1">{missedTasks.length}<span className="text-tertiary/60 text-sm ml-1"></span></p>
-                                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Pending Tasks</p>
+                                    <p className="text-tertiary font-headline font-bold text-2xl mb-1">{todayStats.total - todayStats.completed}<span className="text-tertiary/60 text-sm ml-1"></span></p>
+                                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Remaining</p>
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-white font-headline font-bold text-2xl mb-1">{new Date().toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</p>
-                                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Active Day</p>
+                                    <p className="text-white font-headline font-bold text-2xl mb-1">{todayStats.total === 0 ? '-' : Math.round((todayStats.completed / todayStats.total) * 100)}<span className="text-zinc-500 text-sm ml-1">%</span></p>
+                                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Progress</p>
                                 </div>
                             </div>
                         </section>
@@ -200,7 +229,7 @@ const Dashboard = () => {
                                 </div>
                             </section>
 
-                            {/* Edit Questionnaire Section */}
+                            {/* Edit Preferences Section */}
                             <section 
                                 onClick={() => navigate("/setup", { state: { edit: true } })}
                                 className="glass-panel rounded-2xl p-7 relative overflow-hidden transition-all duration-300 group cursor-pointer border-l-4 border-l-primary/40"
@@ -208,16 +237,16 @@ const Dashboard = () => {
                                 <div className="relative z-10">
                                     <div className="flex items-center gap-4 mb-6">
                                         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:bg-primary/20 transition-colors">
-                                            <span className="material-symbols-outlined text-primary">psychology</span>
+                                            <span className="material-symbols-outlined text-primary">tune</span>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-extrabold font-headline text-white tracking-tight">PROTOCOL UPDATE</h3>
-                                            <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em]">Parameter Matrix</p>
+                                            <h3 className="text-xl font-extrabold font-headline text-white tracking-tight">YOUR PREFERENCES</h3>
+                                            <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em]">Personal Settings</p>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-zinc-400 font-medium mb-8 leading-relaxed">Adjust baseline neural profiles and protocol execution weights to optimize predictive accuracy.</p>
+                                    <p className="text-sm text-zinc-400 font-medium mb-8 leading-relaxed">Update your work hours, peak productivity times, and scheduling preferences to get better AI-generated plans.</p>
                                     <div className="flex items-center justify-between w-full pt-4 border-t border-white/5 group-hover:border-primary/20 transition-colors">
-                                        <span className="text-[11px] font-bold text-white uppercase tracking-widest group-hover:text-primary transition-colors">Configure System Matrix</span>
+                                        <span className="text-[11px] font-bold text-white uppercase tracking-widest group-hover:text-primary transition-colors">Edit Preferences</span>
                                         <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
                                             <span className="material-symbols-outlined text-lg">arrow_forward</span>
                                         </div>
@@ -231,25 +260,36 @@ const Dashboard = () => {
                     </div>
 
                     {/* Bottom Status Bar */}
-                    <footer className="mt-16 flex justify-between items-center border-t border-white/5 pt-10 text-zinc-500 font-medium text-[10px] uppercase tracking-[0.3em]">
-                        <div className="flex items-center gap-10">
-                            <div className="flex items-center gap-2">
+                    <footer className="mt-16 border-t border-white/5 pt-10 text-zinc-500 font-medium text-[10px] uppercase tracking-[0.3em]">
+                        <div className="flex justify-between items-center w-full">
+                            <div className="flex items-center gap-2 flex-1">
                                 <span className="text-white/30">USER:</span>
                                 <span className="text-white font-bold">{currentUser?.displayName?.toUpperCase() || 'OPERATOR'}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-1 justify-center">
                                 <span className="text-white/30">PLAN ID:</span>
                                 <span className="text-white font-bold">VIPER-{currentUser?.uid?.slice(0, 6).toUpperCase() || '001'}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-1 justify-end">
                                 <span className="text-white/30">TASKS TODAY:</span>
                                 <span className="text-tertiary font-bold">{missedTasks.length === 0 ? 'ALL CLEAR' : missedTasks.length + ' PENDING'}</span>
+                                <div className="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_10px_rgba(78,222,163,0.5)] ml-3"></div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
-                        </div>
                     </footer>
+
+                    {/* Footer */}
+                    <div className="mt-12 opacity-50 pointer-events-none">
+                        <div className="h-1 bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
+                        <div className="flex justify-between items-center mt-4">
+                            <div className="font-headline text-[10px] text-zinc-700 tracking-[0.4em] uppercase">
+                                VIPER Planner v1.0
+                            </div>
+                            <div className="font-headline text-[10px] text-zinc-700 tracking-[0.4em] uppercase">
+                                AI-Powered Scheduling
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AppLayout>

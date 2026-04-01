@@ -128,8 +128,8 @@ const SettingsPage = () => {
 
   return (
     <AppLayout>
-      <div className="ml-64 pt-24 px-12 pb-12 min-h-screen bg-surface">
-        <div className="max-w-6xl mx-auto">
+      <div className="ml-64 pt-24 px-12 pb-12 min-h-screen bg-surface flex items-center justify-center">
+        <div className="max-w-6xl w-full">
           {/* Header */}
           <div className="mb-12">
             <h1 className="font-headline text-4xl font-bold tracking-tight text-white flex items-center gap-4">
@@ -137,7 +137,7 @@ const SettingsPage = () => {
               <span className="text-[10px] bg-secondary-container/20 text-secondary border border-secondary/20 px-2 py-0.5 rounded-sm font-label tracking-[0.2em] uppercase">Authenticated</span>
             </h1>
             <p className="text-zinc-500 font-body text-sm mt-2 tracking-wide">
-              Configure operational parameters and interface aesthetics for the NEON_OS core.
+              Customize your scheduling preferences, work hours, and productivity settings to get the most out of VIPER Planner.
             </p>
           </div>
 
@@ -431,20 +431,21 @@ const SettingsPage = () => {
                   </div>
                 </div>
 
-                {/* Support Card */}
+                {/* Tips Card */}
                 <div className="bg-gradient-to-br from-primary/10 to-transparent p-6 border border-primary/20 rounded-xl">
                   <div className="flex gap-4">
-                    <span className="material-symbols-outlined text-primary text-3xl">support_agent</span>
+                    <span className="material-symbols-outlined text-primary text-3xl">lightbulb</span>
                     <div>
-                      <h3 className="font-headline text-xs font-bold text-white uppercase tracking-widest">System Support</h3>
+                      <h3 className="font-headline text-xs font-bold text-white uppercase tracking-widest">Pro Tips</h3>
                       <p className="text-[10px] text-zinc-400 mt-1 leading-relaxed">
-                        Direct uplink to NEON_PROTOCOL engineering team available for Tier-3 operators.
+                        Set your peak productivity hours accurately for better AI scheduling. Most people focus best in the morning.
                       </p>
                       <button 
                         type="button"
+                        onClick={() => navigate('/tasks')}
                         className="mt-4 px-4 py-2 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all duration-100"
                       >
-                        Establish Link
+                        Go to Schedule
                       </button>
                     </div>
                   </div>
@@ -477,10 +478,10 @@ const SettingsPage = () => {
             <div className="h-1 bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
             <div className="flex justify-between items-center mt-4">
               <div className="font-headline text-[10px] text-zinc-700 tracking-[0.4em] uppercase">
-                System Core Rev: 99.4.0
+                VIPER Planner v1.0
               </div>
               <div className="font-headline text-[10px] text-zinc-700 tracking-[0.4em] uppercase">
-                NEON_OS TACTICAL HUD
+                AI-Powered Scheduling
               </div>
             </div>
           </div>

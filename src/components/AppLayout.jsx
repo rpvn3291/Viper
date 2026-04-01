@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../firebase';
+import { collection, query, onSnapshot } from 'firebase/firestore';
+import { format, addHours, isBefore, parseISO } from 'date-fns';
 
 const AppLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, logOut } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [upcomingTasks, setUpcomingTasks] = useState([]);
 
   const currentPath = location.pathname;
 
@@ -17,6 +23,57 @@ const AppLayout = ({ children }) => {
   ];
 
   const isActive = (path) => currentPath === path;
+
+  // Fetch upcoming tasks (due within 1 hour)
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const q = query(collection(db, 'users', currentUser.uid, 'schedule'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const now = new Date();
+      const oneHourFromNow = addHours(now, 1);
+      const upcoming = [];
+
+      snapshot.forEach((docSnap) => {
+        const dateStr = docSnap.id;
+        const items = docSnap.data().items || [];
+        
+        items.forEach((task) => {
+          if (task.completed) return;
+          
+          // Parse task start time
+          const startTime = task.start || task.startTime;
+          if (!startTime) return;
+          
+          // Convert decimal time to hours and minutes
+          const hours = Math.floor(startTime);
+          const minutes = Math.round((startTime - hours) * 60);
+          
+          // Create task datetime
+          const taskDate = parseISO(dateStr);
+          taskDate.setHours(hours, minutes, 0, 0);
+          
+          // Check if task is within next hour and in the future
+          if (isBefore(now, taskDate) && isBefore(taskDate, oneHourFromNow)) {
+            const minutesUntil = Math.round((taskDate - now) / (1000 * 60));
+            upcoming.push({
+              title: task.task || task.title,
+              minutesUntil,
+              date: dateStr
+            });
+          }
+        });
+      });
+
+      // Sort by soonest first
+      upcoming.sort((a, b) => a.minutesUntil - b.minutesUntil);
+      setUpcomingTasks(upcoming);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser?.uid]);
 
   return (
     <div className="flex min-h-screen bg-surface text-on-surface font-body selection:bg-primary/30 selection:text-primary">
@@ -33,15 +90,20 @@ const AppLayout = ({ children }) => {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-label text-xs font-bold uppercase tracking-widest ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate(item.path);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-label text-xs font-bold uppercase tracking-widest text-left ${
                 isActive(item.path)
                   ? 'text-secondary border-r-2 border-secondary bg-secondary/10 shadow-[0_0_10px_rgba(34,211,238,0.2)]'
                   : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
               }`}
             >
-              <span className="material-symbols-outlined text-xl">{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="material-symbols-outlined text-xl pointer-events-none">{item.icon}</span>
+              <span className="pointer-events-none">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -88,12 +150,49 @@ const AppLayout = ({ children }) => {
           </div>
           
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 text-zinc-400">
-              <button className="hover:text-secondary transition-colors">
-                <span className="material-symbols-outlined text-[20px]">notifications</span>
-              </button>
+            <div className="flex items-center gap-4 text-zinc-400 relative">
+              {/* Notifications */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="hover:text-secondary transition-colors relative"
+                >
+                  <span className="material-symbols-outlined text-[20px]">notifications</span>
+                  {upcomingTasks.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full text-[8px] flex items-center justify-center text-white font-bold">
+                      {upcomingTasks.length}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <div className="absolute right-0 top-full mt-2 w-72 bg-surface-container-low border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+                    <div className="p-4 border-b border-white/5">
+                      <h3 className="font-headline text-xs font-bold uppercase tracking-widest text-white">Upcoming Tasks</h3>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {upcomingTasks.length === 0 ? (
+                        <div className="p-6 text-center">
+                          <span className="material-symbols-outlined text-zinc-600 text-3xl mb-2">inbox</span>
+                          <p className="text-zinc-500 text-xs">No upcoming tasks</p>
+                        </div>
+                      ) : (
+                        upcomingTasks.map((task, idx) => (
+                          <div key={idx} className="p-3 border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <p className="text-white text-xs font-bold truncate">{task.title}</p>
+                            <p className="text-secondary text-[10px]">Due in {task.minutesUntil} minutes</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Logout */}
               <button 
-                onClick={() => { logOut(); navigate('/'); }}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="hover:text-error transition-colors"
               >
                 <span className="material-symbols-outlined text-[20px]">power_settings_new</span>
@@ -107,8 +206,35 @@ const AppLayout = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-surface-container-low p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center border border-white/10">
+            <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-error text-3xl">logout</span>
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2 font-headline">Logout?</h2>
+            <p className="text-zinc-400 mb-6 text-sm">Are you sure you want to sign out?</p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-3 bg-surface-container-high text-white rounded-lg font-headline font-bold text-xs uppercase tracking-widest hover:bg-surface-container-highest transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => { logOut(); navigate('/'); }}
+                className="flex-1 py-3 bg-error text-on-error rounded-lg font-headline font-bold text-xs uppercase tracking-widest hover:brightness-110 transition-all"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default AppLayout;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -10,33 +10,64 @@ const CalendarPage = () => {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [schedule, setSchedule] = useState({});
+  const [weekStats, setWeekStats] = useState({ total: 0, completed: 0, pending: 0 });
+  const [lastSync, setLastSync] = useState(null);
+  const syncCountRef = useRef(0);
 
+  // Calculate week days based on currentWeek
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
-  const weekDays = [...Array(7)].map((_, i) => addDays(weekStart, i));
-  const timeSlots = [...Array(11)].map((_, i) => i + 13); // 13:00 to 23:00
+  const weekDays = useMemo(() => 
+    Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), 
+    [weekStart.getTime()]
+  );
+  const timeSlots = Array.from({ length: 11 }, (_, i) => i + 13);
 
+  // Reset sync counter when week changes
+  useEffect(() => {
+    syncCountRef.current = 0;
+    setLastSync(null);
+  }, [currentWeek.getTime()]);
+
+  // Subscribe to schedule data
   useEffect(() => {
     if (!currentUser) return;
 
     const unsubscribes = [];
     
-    // Listen to schedules for all days in the current week
     weekDays.forEach(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
       const unsub = onSnapshot(
         doc(db, 'users', currentUser.uid, 'schedule', dateStr),
         (docSnap) => {
-          setSchedule(prev => ({
-            ...prev,
-            [dateStr]: docSnap.exists() ? docSnap.data().items || [] : []
-          }));
+          setSchedule(prev => {
+            const newSchedule = {
+              ...prev,
+              [dateStr]: docSnap.exists() ? docSnap.data().items || [] : []
+            };
+            return newSchedule;
+          });
+          
+          // Update sync time only once per week change
+          syncCountRef.current += 1;
+          if (syncCountRef.current === weekDays.length) {
+            setLastSync(new Date());
+          }
         }
       );
       unsubscribes.push(unsub);
     });
 
     return () => unsubscribes.forEach(unsub => unsub());
-  }, [currentUser, weekStart]);
+  }, [currentUser?.uid, weekStart.getTime()]);
+
+  // Calculate week stats whenever schedule changes
+  useEffect(() => {
+    const allTasks = Object.values(schedule).flat();
+    const total = allTasks.length;
+    const completed = allTasks.filter(t => t.completed).length;
+    const pending = total - completed;
+    setWeekStats({ total, completed, pending });
+  }, [schedule]);
 
   const nextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
   const prevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
@@ -194,44 +225,64 @@ const CalendarPage = () => {
         <div className="mt-8 grid grid-cols-4 gap-6">
           <div className="bg-surface-container-low p-6 rounded-xl border-l-4 border-primary/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 opacity-10 scale-150">
-              <span className="material-symbols-outlined text-6xl text-primary">rocket_launch</span>
+              <span className="material-symbols-outlined text-6xl text-primary">calendar_view_week</span>
             </div>
             <div className="font-headline text-[10px] text-zinc-500 tracking-widest uppercase">Weekly Load</div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-headline font-bold text-primary">{Math.min(100, Object.values(schedule).flat().length * 10)}%</span>
-              <span className="text-xs text-zinc-400">Active Tasks</span>
+              <span className="text-3xl font-headline font-bold text-primary">{weekStats.total}</span>
+              <span className="text-xs text-zinc-400">Tasks Scheduled</span>
             </div>
           </div>
           <div className="bg-surface-container-low p-6 rounded-xl border-l-4 border-secondary/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 opacity-10 scale-150">
-              <span className="material-symbols-outlined text-6xl text-secondary">speed</span>
+              <span className="material-symbols-outlined text-6xl text-secondary">percent</span>
             </div>
-            <div className="font-headline text-[10px] text-zinc-500 tracking-widest uppercase">System Latency</div>
+            <div className="font-headline text-[10px] text-zinc-500 tracking-widest uppercase">Week Progress</div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-headline font-bold text-secondary">04ms</span>
-              <span className="text-xs text-tertiary font-bold uppercase">OPTIMAL</span>
+              <span className="text-3xl font-headline font-bold text-secondary">
+                {weekStats.total === 0 ? 0 : Math.round((weekStats.completed / weekStats.total) * 100)}%
+              </span>
+              <span className="text-xs text-tertiary font-bold uppercase">
+                {weekStats.completed}/{weekStats.total} Done
+              </span>
             </div>
           </div>
           <div className="bg-surface-container-low p-6 rounded-xl border-l-4 border-tertiary/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 opacity-10 scale-150">
-              <span className="material-symbols-outlined text-6xl text-tertiary">security</span>
+              <span className="material-symbols-outlined text-6xl text-tertiary">sync</span>
             </div>
-            <div className="font-headline text-[10px] text-zinc-500 tracking-widest uppercase">Sync Status</div>
+            <div className="font-headline text-[10px] text-zinc-500 tracking-widest uppercase">Last Sync</div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-headline font-bold text-tertiary">LIVE</span>
-              <span className="text-xs text-zinc-400">Firebase</span>
+              <span className="text-3xl font-headline font-bold text-tertiary">
+                {lastSync ? format(lastSync, 'HH:mm') : '--:--'}
+              </span>
+              <span className="text-xs text-zinc-400">
+                {lastSync ? format(lastSync, 'a') : ''}
+              </span>
             </div>
           </div>
           <div className="bg-surface-container-low p-6 rounded-xl border-l-4 border-error/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 opacity-10 scale-150">
-              <span className="material-symbols-outlined text-6xl text-error">warning</span>
+              <span className="material-symbols-outlined text-6xl text-error">pending_actions</span>
             </div>
             <div className="font-headline text-[10px] text-zinc-500 tracking-widest uppercase">Pending Tasks</div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl font-headline font-bold text-error">
-                {Object.values(schedule).flat().filter(t => !t.completed).length}
+                {weekStats.pending}
               </span>
-              <span className="text-xs text-zinc-400">Requires attention</span>
+              <span className="text-xs text-zinc-400">
+                {weekStats.pending === 0 ? 'All Caught Up!' : 'To Complete'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-12 opacity-50 pointer-events-none">
+          <div className="h-1 bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
+          <div className="flex justify-center items-center mt-4">
+            <div className="font-headline text-[10px] text-zinc-700 tracking-[0.4em] uppercase">
+              VIPER Planner — AI-Powered Scheduling
             </div>
           </div>
         </div>
