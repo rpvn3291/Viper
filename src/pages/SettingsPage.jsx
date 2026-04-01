@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { Save, Clock, Brain } from 'lucide-react';
+import { Save, Clock, Brain, ArrowLeft } from 'lucide-react';
 
-const Questionnaire = () => {
+const SettingsPage = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
+  
   const [formData, setFormData] = useState({
     startTime: 9,
     peakTime: 'morning',
@@ -24,24 +24,33 @@ const Questionnaire = () => {
   });
 
   useEffect(() => {
-    // Check if profile already exists
-    const checkProfile = async () => {
+    const fetchProfile = async () => {
       try {
         const docRef = doc(db, 'users', currentUser.uid, 'profile', 'config');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          // If already filled out, go straight to dashboard
-          navigate('/tasks');
-        } else {
-          setLoading(false);
+          const data = docSnap.data();
+            setFormData({
+              startTime: data.startTime || 9,
+              peakTime: data.peakTime || 'morning',
+              preference: data.preference || 'hard-first',
+              availableHours: data.availableHours || 6,
+              blockedTimeStart: data.blockedTime?.start || 10,
+              blockedTimeEnd: data.blockedTime?.end || 17,
+              workStyle: data.workStyle || 'deep-work',
+              chronotype: data.chronotype || 'early-bird',
+              hobbies: data.hobbies || '',
+              dislikes: data.dislikes || ''
+            });
         }
       } catch (err) {
-        console.error("Error checking profile:", err);
+        console.error("Error fetching profile:", err);
+      } finally {
         setLoading(false);
       }
     };
-    checkProfile();
-  }, [currentUser, navigate]);
+    fetchProfile();
+  }, [currentUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,25 +74,33 @@ const Questionnaire = () => {
         hobbies: formData.hobbies,
         dislikes: formData.dislikes
       };
-
+      
       await setDoc(doc(db, 'users', currentUser.uid, 'profile', 'config'), payload);
-      navigate('/dashboard');
+      alert("Profile updated successfully!");
+      navigate('/tasks');
     } catch (err) {
       console.error("Error saving profile", err);
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>;
+  if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading Settings...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <div className="bg-white max-w-xl w-full rounded-3xl shadow-xl overflow-hidden animate-fade-in-up">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 relative">
+      <button 
+        onClick={() => navigate('/tasks')} 
+        className="absolute top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-slate-800 transition"
+      >
+        <ArrowLeft className="w-5 h-5" /> Back to Tasks
+      </button>
+
+      <div className="bg-white max-w-xl w-full rounded-3xl shadow-xl overflow-hidden animate-fade-in-up mt-10">
         <div className="bg-primary-600 p-8 text-white text-center">
           <Brain className="w-12 h-12 mx-auto mb-4 text-primary-200" />
-          <h2 className="text-3xl font-bold">Configure Your AI Worker</h2>
-          <p className="text-primary-100 mt-2">Let's personalize your schedule engine.</p>
+          <h2 className="text-3xl font-bold">Profile Settings</h2>
+          <p className="text-primary-100 mt-2">Update your AI worker preferences here.</p>
         </div>
-
+        
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -92,11 +109,11 @@ const Questionnaire = () => {
               </label>
               <select name="startTime" value={formData.startTime} onChange={handleChange} className="w-full p-3 bg-slate-100 border border-transparent focus:border-primary-500 rounded-xl outline-none transition">
                 {[...Array(24)].map((_, i) => (
-                  <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
+                  <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
                 ))}
               </select>
             </div>
-
+            
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary-500" /> Available Hours/Day
@@ -127,13 +144,13 @@ const Questionnaire = () => {
           </div>
 
           <div className="space-y-4 pt-4 border-t border-slate-100">
-            <h3 className="font-bold text-slate-800">Fixed Blocked Time (e.g. Work/College)</h3>
+            <h3 className="font-bold text-slate-800">Fixed Blocked Time</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700">Block Start</label>
                 <select name="blockedTimeStart" value={formData.blockedTimeStart} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
                   {[...Array(24)].map((_, i) => (
-                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
+                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
                   ))}
                 </select>
               </div>
@@ -141,7 +158,7 @@ const Questionnaire = () => {
                 <label className="text-sm font-semibold text-slate-700">Block End</label>
                 <select name="blockedTimeEnd" value={formData.blockedTimeEnd} onChange={handleChange} className="w-full p-3 bg-slate-100 rounded-xl outline-none">
                   {[...Array(24)].map((_, i) => (
-                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
+                    <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}</option>
                   ))}
                 </select>
               </div>
@@ -182,7 +199,7 @@ const Questionnaire = () => {
 
           <button type="submit" className="w-full mt-6 flex justify-center items-center gap-2 bg-primary-600 text-white font-bold py-4 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/30">
             <Save className="w-5 h-5" />
-            Save & Continue to Tasks
+            Save Changes
           </button>
         </form>
       </div>
@@ -190,4 +207,4 @@ const Questionnaire = () => {
   );
 };
 
-export default Questionnaire;
+export default SettingsPage;

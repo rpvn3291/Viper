@@ -7,6 +7,9 @@ import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Questionnaire from './pages/Questionnaire';
 
+import TasksPage from './pages/TasksPage';
+import SettingsPage from './pages/SettingsPage';
+
 const ProtectedRoute = ({ children }) => {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/" />;
@@ -20,9 +23,12 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <LandingPage />} />
+      <Route path="/" element={currentUser ? <Navigate to="/tasks" /> : <LandingPage />} />
       <Route path="/setup" element={<ProtectedRoute><Questionnaire /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
+      <Route path="/calendar" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<Navigate to="/calendar" />} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
     </Routes>
   );
 }
