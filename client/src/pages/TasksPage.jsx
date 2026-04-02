@@ -24,6 +24,8 @@ const TasksPage = () => {
   const [dailyMood, setDailyMood] = useState(null);
   const [completedRoutines, setCompletedRoutines] = useState([]);
   const [skippedRoutines, setSkippedRoutines] = useState([]);
+  const [selectedModel, setSelectedModel] = useState('All Models');
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const dateInputRef = useRef(null);
 
   useEffect(() => {
@@ -253,7 +255,10 @@ const TasksPage = () => {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ 
+          prompt,
+          selectedModel: selectedModel === 'All Models' ? null : selectedModel
+        })
       });
 
       if (!response.ok) {
@@ -376,6 +381,44 @@ const TasksPage = () => {
                     onBlur={() => saveDailyCondition(dailyCondition)}
                     className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded p-4 font-body text-sm text-on-surface placeholder:text-zinc-600 outline-none focus:border-secondary/50 min-h-[80px] resize-none"
                   />
+                </div>
+
+                {/* Model Selection Dropdown */}
+                <div className="relative mb-4">
+                  <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2 block">AI Engine Selection</span>
+                  <div 
+                    onClick={() => setShowModelDropdown(!showModelDropdown)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded p-4 font-headline text-sm text-on-surface flex items-center justify-between cursor-pointer hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-sm">neurology</span>
+                      <span className="uppercase tracking-widest">{selectedModel.replace(/-/g, ' ').replace('models/', '').toUpperCase()}</span>
+                    </div>
+                    <span className="material-symbols-outlined transition-transform duration-300" style={{ transform: showModelDropdown ? 'rotate(180deg)' : 'rotate(0)' }}>expand_more</span>
+                  </div>
+                  
+                  {showModelDropdown && (
+                    <div className="absolute bottom-full left-0 w-full mb-2 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-2xl z-50 overflow-hidden animate-fade-in-up">
+                      {[
+                        { id: 'All Models', label: 'All Models' },
+                        { id: 'gemini-3.1-flash-live-preview', label: 'Gemini 3.1 Flash' },
+                        { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                        { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+                        { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' }
+                      ].map((m) => (
+                        <div 
+                          key={m.id}
+                          onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
+                          className={`px-4 py-3 hover:bg-primary/10 cursor-pointer flex items-center justify-between group transition-colors ${selectedModel === m.id ? 'bg-primary/20' : ''}`}
+                        >
+                          <span className={`font-headline text-xs uppercase tracking-widest ${selectedModel === m.id ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
+                            {m.label}
+                          </span>
+                          {selectedModel === m.id && <span className="material-symbols-outlined text-primary text-sm">check</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-4">

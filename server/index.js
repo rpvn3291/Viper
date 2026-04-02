@@ -19,22 +19,20 @@ const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY || process.
 
 app.post('/api/generate', async (req, res) => {
     try {
-        const { prompt } = req.body;
-        const modelsToTry = [
-            'gemini-2.5-flash', 
+        const { prompt, selectedModel } = req.body;
+        
+        // Use confirmed available models for this specific API key
+        const modelsToTry = selectedModel ? [selectedModel] : [
+            'gemini-3.1-flash-live-preview',
+            'gemini-2.5-flash',
             'gemini-2.5-pro',
-            'gemini-2.0-flash', 
-            'gemini-2.0-flash-lite',
-            'gemini-2.0-pro-exp',
-            'gemini-1.5-pro',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b',
-            'gemini-1.0-pro',
-            'gemini-pro'
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite-001'
         ];
+        
         let result = null;
-
         let lastError = "Unknown error";
+        
         for (const modelName of modelsToTry) {
             try {
                 result = await ai.models.generateContent({ model: modelName, contents: prompt });
@@ -46,10 +44,10 @@ app.post('/api/generate', async (req, res) => {
         }
 
         if (!result) throw new Error(`Google API Reject: ${lastError}`);
-        
+
         let cleanJson = result.text.trim().replace(/^```json/g, '').replace(/```$/g, '').trim();
         const scheduleData = JSON.parse(cleanJson);
-        res.json({ success: true, data: scheduleData });
+        res.json({ success: true, data: scheduleData, modelUsed: result.model });
     } catch (e) {
         console.error("AI Error:", e);
         res.status(500).json({ success: false, error: e.message });

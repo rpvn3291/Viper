@@ -33,7 +33,11 @@ const AppLayout = ({ children }) => {
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const now = new Date();
-      const oneHourFromNow = addHours(now, 1);
+      
+      // CHANGE THIS VARIABLE to adjust how many hours ahead the notification looks
+      const NOTIFICATION_HOURS_AHEAD = 6; 
+      const notificationHorizon = addHours(now, NOTIFICATION_HOURS_AHEAD);
+      
       const upcoming = [];
 
       snapshot.forEach((docSnap) => {
@@ -44,31 +48,52 @@ const AppLayout = ({ children }) => {
           if (task.completed) return;
           
           // Parse task start time
-          const startTime = task.start || task.startTime;
-          if (!startTime) return;
+          const startTime = task.start !== undefined ? task.start : task.startTime;
+          if (startTime === undefined || startTime === null) return;
+          const endTime = task.end !== undefined ? task.end : (task.endTime !== undefined ? task.endTime : startTime + 1);
           
           // Convert decimal time to hours and minutes
-          const hours = Math.floor(startTime);
-          const minutes = Math.round((startTime - hours) * 60);
+          const sHours = Math.floor(startTime);
+          const sMinutes = Math.round((startTime - sHours) * 60);
+
+          const eHours = Math.floor(endTime);
+          const eMinutes = Math.round((endTime - eHours) * 60);
           
-          // Create task datetime
-          const taskDate = parseISO(dateStr);
-          taskDate.setHours(hours, minutes, 0, 0);
+          // Create task datetime bounds
+          const taskStartDate = parseISO(dateStr);
+          taskStartDate.setHours(sHours, sMinutes, 0, 0);
+
+          const taskEndDate = parseISO(dateStr);
+          taskEndDate.setHours(eHours, eMinutes, 0, 0);
           
-          // Check if task is within next hour and in the future
-          if (isBefore(now, taskDate) && isBefore(taskDate, oneHourFromNow)) {
-            const minutesUntil = Math.round((taskDate - now) / (1000 * 60));
+          // Check if task is currently active
+          const isStarted = now.getTime() >= taskStartDate.getTime();
+          const isNotFinished = now.getTime() < taskEndDate.getTime();
+
+          if (isStarted && isNotFinished) {
             upcoming.push({
               title: task.task || task.title,
+              isActive: true,
+              date: dateStr,
+              sortIdx: 0 // Active tasks float to top
+            });
+          }
+          // Check if task is upcoming within the horizon
+          else if (!isStarted && isBefore(taskStartDate, notificationHorizon)) {
+            const minutesUntil = Math.round((taskStartDate - now) / (1000 * 60));
+            upcoming.push({
+              title: task.task || task.title,
+              isActive: false,
               minutesUntil,
-              date: dateStr
+              date: dateStr,
+              sortIdx: minutesUntil
             });
           }
         });
       });
 
-      // Sort by soonest first
-      upcoming.sort((a, b) => a.minutesUntil - b.minutesUntil);
+      // Sort by active first, then soonest
+      upcoming.sort((a, b) => a.sortIdx - b.sortIdx);
       setUpcomingTasks(upcoming);
     });
 
@@ -159,7 +184,7 @@ const AppLayout = ({ children }) => {
                 >
                   <span className="material-symbols-outlined text-[20px]">notifications</span>
                   {upcomingTasks.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full text-[8px] flex items-center justify-center text-white font-bold">
+                    <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[8px] flex items-center justify-center text-white font-bold ${upcomingTasks.some(t => t.isActive) ? 'bg-primary shadow-[0_0_8px_rgba(221,183,255,0.8)]' : 'bg-error'}`}>
                       {upcomingTasks.length}
                     </span>
                   )}
@@ -179,9 +204,15 @@ const AppLayout = ({ children }) => {
                         </div>
                       ) : (
                         upcomingTasks.map((task, idx) => (
-                          <div key={idx} className="p-3 border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <div key={idx} className={`p-3 border-b border-white/5 transition-colors ${task.isActive ? 'bg-primary/5 hover:bg-primary/10 border-l-2 border-primary' : 'hover:bg-white/5'}`}>
                             <p className="text-white text-xs font-bold truncate">{task.title}</p>
-                            <p className="text-secondary text-[10px]">Due in {task.minutesUntil} minutes</p>
+                            {task.isActive ? (
+                                <p className="text-primary text-[10px] font-bold mt-1 uppercase tracking-widest flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> IN PROGRESS
+                                </p>
+                            ) : (
+                                <p className="text-secondary text-[10px]">Due in {task.minutesUntil} minutes</p>
+                            )}
                           </div>
                         ))
                       )}

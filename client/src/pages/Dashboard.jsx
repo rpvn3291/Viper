@@ -32,9 +32,11 @@ const Dashboard = () => {
                 const today = startOfToday();
                 pendingTasksSnapshot.forEach(docSnap => {
                     const taskData = docSnap.data();
-                    const date = parseISO(taskData.date);
-                    if (isValid(date) && isBefore(date, today)) {
-                        missed.push({ id: docSnap.id, ...taskData });
+                    if (taskData && taskData.date) {
+                        const date = parseISO(taskData.date);
+                        if (isValid(date) && isBefore(date, today)) {
+                            missed.push({ id: docSnap.id, ...taskData });
+                        }
                     }
                 });
 
@@ -51,17 +53,21 @@ const Dashboard = () => {
                 const dailyContextRef = doc(db, "users", currentUser.uid, "dailyContext", todayStr);
                 const dcSnap = await getDoc(dailyContextRef);
                 let completedRoutinesArr = [];
+                let skippedRoutinesArr = [];
                 if (dcSnap.exists()) {
                     completedRoutinesArr = dcSnap.data().completedRoutines || [];
+                    skippedRoutinesArr = dcSnap.data().skippedRoutines || [];
                 }
                 
                 let rts = [];
                 routinesSnapshot.forEach(docSnap => {
-                    rts.push({ id: docSnap.id, ...docSnap.data() });
+                    if (!skippedRoutinesArr.includes(docSnap.id)) {
+                        rts.push({ id: docSnap.id, ...docSnap.data() });
+                    }
                 });
 
-                todayTotal += routinesSnapshot.size;
-                todayCompleted += completedRoutinesArr.length;
+                todayTotal += rts.length;
+                todayCompleted += completedRoutinesArr.filter(id => !skippedRoutinesArr.includes(id)).length;
 
                 rts.forEach(r => {
                     agenda.push({ id: r.id, type: 'routine', completed: completedRoutinesArr.includes(r.id), ...r });

@@ -103,24 +103,31 @@ const CalendarPage = () => {
 
   // Calculate week stats whenever schedule, tasks or context changes
   useEffect(() => {
-    const allTasks = Object.values(schedule).flat();
-    const total = allTasks.length;
-    
+    let total = 0;
     let completed = 0;
+
     Object.entries(schedule).forEach(([dateStr, items]) => {
       const dayContext = weekContexts[dateStr] || {};
       const completedRoutines = dayContext.completedRoutines || [];
       
       items.forEach(t => {
          let lookupId = t.taskId;
+         let exists = false;
+
          if (!lookupId) {
              const fTask = weekTasks.find(wt => wt.task.toLowerCase().trim() === t.task.toLowerCase().trim() && wt.date === dateStr);
-             if (fTask) lookupId = fTask.id;
+             if (fTask) { lookupId = fTask.id; exists = true; }
              else {
                  const fRoutine = routines.find(rt => rt.task.toLowerCase().trim() === t.task.toLowerCase().trim());
-                 if (fRoutine) lookupId = fRoutine.id;
+                 if (fRoutine) { lookupId = fRoutine.id; exists = true; }
              }
+         } else {
+             exists = weekTasks.some(wt => wt.id === lookupId) || routines.some(rt => rt.id === lookupId);
          }
+
+         if (!exists) return; // Completely ignore deleted tasks
+
+         total++;
 
          if (lookupId) {
             const matchedTask = weekTasks.find(wt => wt.id === lookupId);
@@ -135,7 +142,7 @@ const CalendarPage = () => {
 
     const pending = total - completed;
     setWeekStats({ total, completed, pending });
-  }, [schedule, weekTasks, weekContexts]);
+  }, [schedule, weekTasks, weekContexts, routines]);
 
   const handleToggleEvent = async (scheduleItem, dateStr) => {
       let matchedTaskId = scheduleItem.taskId;
@@ -324,18 +331,25 @@ const CalendarPage = () => {
                       </div>
                     )}
                     {dayTasks.map((task, taskIndex) => {
-                      const { top, height, color } = getEventStyle(task, taskIndex);
-                      
-                      let isCompleted = false;
                       let lookupId = task.taskId;
+                      let exists = false;
+
                       if (!lookupId) {
                           const fTask = weekTasks.find(wt => wt.task.toLowerCase().trim() === task.task.toLowerCase().trim() && wt.date === dateStr);
-                          if (fTask) lookupId = fTask.id;
+                          if (fTask) { lookupId = fTask.id; exists = true; }
                           else {
                               const fRoutine = routines.find(rt => rt.task.toLowerCase().trim() === task.task.toLowerCase().trim());
-                              if (fRoutine) lookupId = fRoutine.id;
+                              if (fRoutine) { lookupId = fRoutine.id; exists = true; }
                           }
+                      } else {
+                          exists = weekTasks.some(wt => wt.id === lookupId) || routines.some(rt => rt.id === lookupId);
                       }
+
+                      // If the task was officially deleted from the database, hide it dynamically from the calendar
+                      if (!exists) return null;
+
+                      const { top, height, color } = getEventStyle(task, taskIndex);
+                      let isCompleted = false;
 
                       if (lookupId) {
                           const matchedTask = weekTasks.find(wt => wt.id === lookupId);
