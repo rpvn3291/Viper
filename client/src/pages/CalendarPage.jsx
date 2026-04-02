@@ -200,16 +200,19 @@ const CalendarPage = () => {
     const durationHours = endHour - startHour;
     
     const top = startHour * 96;
-    const height = durationHours * 96;
+    let height = durationHours * 96;
     
+    // UI Fix: Force a minimum height so small/squashed AI tasks remain legible during rendering.
+    const visualHeight = Math.max(height, 56); 
+
     const colors = [
-      { bg: 'bg-secondary/10', border: 'border-secondary', text: 'text-secondary' },
-      { bg: 'bg-primary/10', border: 'border-primary', text: 'text-primary' },
-      { bg: 'bg-tertiary/10', border: 'border-tertiary', text: 'text-tertiary' },
+      { bg: 'bg-secondary/20', border: 'border-secondary', text: 'text-secondary' },
+      { bg: 'bg-primary/20', border: 'border-primary', text: 'text-primary' },
+      { bg: 'bg-tertiary/20', border: 'border-tertiary', text: 'text-tertiary' },
     ];
     const color = colors[index % colors.length];
     
-    return { top, height, color };
+    return { top, height: visualHeight, color };
   };
 
   const weekNumber = getWeek(currentWeek);

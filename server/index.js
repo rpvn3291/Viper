@@ -20,19 +20,32 @@ const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY || process.
 app.post('/api/generate', async (req, res) => {
     try {
         const { prompt } = req.body;
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        const modelsToTry = [
+            'gemini-2.5-flash', 
+            'gemini-2.5-pro',
+            'gemini-2.0-flash', 
+            'gemini-2.0-flash-lite',
+            'gemini-2.0-pro-exp',
+            'gemini-1.5-pro',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b',
+            'gemini-1.0-pro',
+            'gemini-pro'
+        ];
         let result = null;
 
+        let lastError = "Unknown error";
         for (const modelName of modelsToTry) {
             try {
                 result = await ai.models.generateContent({ model: modelName, contents: prompt });
                 break;
             } catch (error) {
+                lastError = error.message;
                 console.warn(`Model ${modelName} failed:`, error.message);
             }
         }
 
-        if (!result) throw new Error("All Gemini models are overloaded");
+        if (!result) throw new Error(`Google API Reject: ${lastError}`);
         
         let cleanJson = result.text.trim().replace(/^```json/g, '').replace(/```$/g, '').trim();
         const scheduleData = JSON.parse(cleanJson);
