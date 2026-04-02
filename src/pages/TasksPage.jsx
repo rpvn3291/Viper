@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, doc, getDoc, setDoc, addDoc, serverTimestamp, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { GoogleGenAI } from '@google/genai';
+
 import AppLayout from '../components/AppLayout';
 
 const TasksPage = () => {
@@ -16,12 +16,15 @@ const TasksPage = () => {
   const [loading, setLoading] = useState(false);
   const [newTask, setNewTask] = useState('');
   const [estimatedHours, setEstimatedHours] = useState(1);
+  const [deadline, setDeadline] = useState('');
   const [targetDate, setTargetDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isDaily, setIsDaily] = useState(false);
   const [routines, setRoutines] = useState([]);
   const [dailyCondition, setDailyCondition] = useState("");
   const [dailyMood, setDailyMood] = useState(null);
   const [completedRoutines, setCompletedRoutines] = useState([]);
+  const [skippedRoutines, setSkippedRoutines] = useState([]);
+  const dateInputRef = useRef(null);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -64,10 +67,12 @@ const TasksPage = () => {
           setDailyCondition(docSnap.data().extraCondition || "");
           setDailyMood(docSnap.data().mood || null);
           setCompletedRoutines(docSnap.data().completedRoutines || []);
+          setSkippedRoutines(docSnap.data().skippedRoutines || []);
         } else {
           setDailyCondition("");
           setDailyMood(null);
           setCompletedRoutines([]);
+          setSkippedRoutines([]);
         }
       } catch (err) {
         console.error(err);
@@ -99,7 +104,8 @@ const TasksPage = () => {
       if (isDaily) {
         await addDoc(collection(db, 'users', currentUser.uid, 'routines'), {
           task: newTask,
-          duration: estimatedHours,
+          estimatedHours: estimatedHours,
+          deadline: deadline || null,
           createdAt: serverTimestamp()
         });
         setIsDaily(false);
@@ -107,7 +113,8 @@ const TasksPage = () => {
         await addDoc(collection(db, 'users', currentUser.uid, 'tasks'), {
           task: newTask,
           priority: "normal",
-          duration: estimatedHours,
+          estimatedHours: estimatedHours,
+          deadline: deadline || null,
           status: "pending",
           date: targetDate,
           createdAt: serverTimestamp()
@@ -115,6 +122,7 @@ const TasksPage = () => {
       }
       setNewTask('');
       setEstimatedHours(1);
+      setDeadline('');
     } catch (err) {
       console.error(err);
     }
@@ -147,6 +155,22 @@ const TasksPage = () => {
     }
   };
 
+  const handleToggleRoutineSkip = async (routineId) => {
+    if (!currentUser) return;
+    try {
+      const isSkipped = skippedRoutines.includes(routineId);
+      const newSkippedRoutines = isSkipped 
+        ? skippedRoutines.filter(id => id !== routineId)
+        : [...skippedRoutines, routineId];
+      
+      setSkippedRoutines(newSkippedRoutines);
+      const docRef = doc(db, 'users', currentUser.uid, 'dailyContext', targetDate);
+      await setDoc(docRef, { skippedRoutines: newSkippedRoutines, updatedAt: serverTimestamp() }, { merge: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleDeleteRoutine = async (routineId) => {
     await deleteDoc(doc(db, 'users', currentUser.uid, 'routines', routineId));
   };
@@ -159,19 +183,12 @@ const TasksPage = () => {
 
     setLoading(true);
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) {
-        alert("Please set VITE_GEMINI_API_KEY in your .env file!");
-        setLoading(false);
-        return;
-      }
-      
-      const ai = new GoogleGenAI({ apiKey });
 
       const pendingTasks = tasks.filter(t => t.status === 'pending').map(t => ({
         taskId: t.id,
         task: t.task,
-        duration: Number(t.duration)
+        deadline: t.deadline || null,
+        estimatedHours: Number(t.estimatedHours || t.duration)
       }));
 
       const payload = {
@@ -179,7 +196,9 @@ const TasksPage = () => {
         dailyMood: dailyMood || 'Not specified',
         extraCondition: dailyCondition || 'None',
         tasks: pendingTasks,
-        dailyRoutines: routines.map(r => ({ task: r.task, duration: Number(r.duration) })),
+        dailyRoutines: routines
+          .filter(r => !skippedRoutines.includes(r.id))
+          .map(r => ({ taskId: r.id, task: r.task, deadline: r.deadline || null, estimatedHours: Number(r.estimatedHours || r.duration) })),
         userProfile: {
           startTime: Number(profile.startTime),
           peakTime: profile.peakTime,
@@ -196,6 +215,9 @@ const TasksPage = () => {
 
       const parsedTargetDate = parseISO(targetDate);
       const isWeekend = parsedTargetDate.getDay() === 0 || parsedTargetDate.getDay() === 6;
+      
+      const isToday = targetDate === format(new Date(), 'yyyy-MM-dd');
+      const currentTimeFloat = isToday ? (new Date().getHours() + new Date().getMinutes() / 60).toFixed(2) : null;
 
       const prompt = `
         You are an expert AI Life Scheduler. Analyze the following user profile, target date, task backlog, daily routines, history, and the user's current condition:
@@ -217,6 +239,10 @@ const TasksPage = () => {
         }
         4. You must schedule EVERY task in the pending backlog PLUS EVERY routine.
         5. The 'taskId' should be returned exactly as provided.
+        ${isToday ? `6. IMPORTANT: It is currently ${currentTimeFloat} (in 24h decimal time). You MUST ONLY assign 'start' times strictly AFTER ${currentTimeFloat} today. Do NOT schedule anything in the past.` : ''}
+        7. DEADLINES: If a task has a 'deadline' (HH:MM format), its 'end' time MUST be less than or equal to that deadline's decimal equivalent.
+        8. CONFLICTS: For mathematically impossible overlaps, prioritize via Earliest Due Date. Push lower priority tasks past their deadline immediately following the blocking task rather than overlapping them.
+        9. PROPORTIONAL REDUCTION: If the cumulative sum of all durations exceeds available hours, proportionally SHRINK the scheduled duration (end - start) for every item to squeeze them all in perfectly.
 
         Output EXACTLY valid JSON matching the following schema:
         [
@@ -224,32 +250,23 @@ const TasksPage = () => {
         ]
       `;
 
-      const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-      let result = null;
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
 
-      for (const modelName of modelsToTry) {
-        try {
-          result = await ai.models.generateContent({ model: modelName, contents: prompt });
-          break;
-        } catch (error) {
-          console.warn(`Model ${modelName} failed:`, error.message);
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Backend request failed");
       }
 
-      if (!result) {
-        throw new Error("All Gemini models are currently overloaded.");
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || "Backend returned failure");
       }
       
-      const responseText = result.text.trim();
-      let newSchedule = [];
-      try {
-        let cleanJson = responseText.replace(/^```json/g, '').replace(/```$/g, '').trim();
-        newSchedule = JSON.parse(cleanJson);
-      } catch(e) {
-        console.error("AI Output failed to parse:", responseText);
-        alert("AI returned invalid data. Please try again.");
-        return;
-      }
+      const newSchedule = result.data;
 
       if(newSchedule.length > 0) {
         await setDoc(doc(db, 'users', currentUser.uid, 'schedule', targetDate), {
@@ -278,13 +295,17 @@ const TasksPage = () => {
               <div className="flex items-center justify-between mb-8">
                 <div className="flex flex-col">
                   <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-1">Target Date</span>
-                  <div className="flex items-center gap-3 bg-surface-container-lowest px-4 py-2 rounded border border-outline-variant/20">
-                    <span className="material-symbols-outlined text-secondary">calendar_month</span>
+                  <div 
+                    className="flex items-center gap-3 bg-surface-container-lowest px-4 py-2 rounded border border-outline-variant/20 cursor-pointer"
+                    onClick={() => dateInputRef.current && dateInputRef.current.showPicker?.()}
+                  >
+                    <span className="material-symbols-outlined text-secondary pointer-events-none">calendar_month</span>
                     <input 
+                      ref={dateInputRef}
                       type="date" 
                       value={targetDate}
                       onChange={(e) => setTargetDate(e.target.value)}
-                      className="bg-transparent border-none text-on-surface font-headline font-bold text-lg tracking-widest outline-none"
+                      className="bg-transparent border-none text-on-surface font-headline font-bold text-lg tracking-widest outline-none cursor-pointer"
                     />
                   </div>
                 </div>
@@ -313,13 +334,22 @@ const TasksPage = () => {
                 
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2 block">Duration (hrs)</span>
+                    <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2 block">Estimation Time (hrs)</span>
                     <input 
                       type="number" 
                       min="0.5" 
                       step="0.5" 
                       value={estimatedHours}
                       onChange={(e) => setEstimatedHours(Number(e.target.value))}
+                      className="w-full bg-surface-container-lowest border-none focus:ring-0 focus:border-b-2 focus:border-secondary border-b-2 border-outline-variant/10 p-4 font-headline text-lg tracking-tight text-on-surface outline-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-label text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-2 block">Deadline (Opt)</span>
+                    <input 
+                      type="time" 
+                      value={deadline}
+                      onChange={(e) => setDeadline(e.target.value)}
                       className="w-full bg-surface-container-lowest border-none focus:ring-0 focus:border-b-2 focus:border-secondary border-b-2 border-outline-variant/10 p-4 font-headline text-lg tracking-tight text-on-surface outline-none"
                     />
                   </div>
@@ -487,7 +517,10 @@ const TasksPage = () => {
                     <div key={t.id} className={`p-4 rounded-lg border transition-all flex items-center justify-between ${t.status === 'completed' ? 'bg-surface-container-lowest/50 border-white/5 opacity-60' : 'bg-surface-container-lowest border-white/10'}`}>
                       <div>
                         <h4 className={`font-semibold text-sm ${t.status === 'completed' ? 'line-through text-zinc-500' : 'text-on-surface'}`}>{t.task}</h4>
-                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Duration: {t.duration}h</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-semibold text-zinc-500 uppercase">Est. Time: {t.estimatedHours || t.duration}h</span>
+                          {t.deadline && <span className="text-[10px] font-semibold text-secondary uppercase bg-secondary/10 px-1 rounded">Dead: {t.deadline}</span>}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <button 
@@ -532,16 +565,32 @@ const TasksPage = () => {
                 ) : (
                   routines.map(r => {
                     const isCompleted = completedRoutines.includes(r.id);
+                    const isSkipped = skippedRoutines.includes(r.id);
                     return (
-                      <div key={r.id} className={`p-4 rounded-lg border transition-all flex items-center justify-between ${isCompleted ? 'bg-surface-container-lowest/50 border-white/5 opacity-60' : 'bg-surface-container-lowest border-white/10'}`}>
+                      <div key={r.id} className={`p-4 rounded-lg border transition-all flex items-center justify-between ${isCompleted ? 'bg-surface-container-lowest/50 border-white/5 opacity-60' : isSkipped ? 'bg-surface-container-lowest border-zinc-700/30 opacity-40 grayscale' : 'bg-surface-container-lowest border-white/10'}`}>
                         <div>
-                          <h4 className={`font-semibold text-sm ${isCompleted ? 'line-through text-zinc-500' : 'text-on-surface'}`}>{r.task}</h4>
-                          <span className="text-[10px] font-semibold text-zinc-500 uppercase">Duration: {r.duration}h</span>
+                          <h4 className={`font-semibold text-sm ${isCompleted || isSkipped ? 'line-through text-zinc-500' : 'text-on-surface'}`}>{r.task}</h4>
+                          <div className="flex items-center gap-3 mt-1">
+                            {isSkipped ? (
+                                <span className="text-[10px] font-semibold text-error/80 uppercase">SKIPPED</span>
+                            ) : (
+                                <span className="text-[10px] font-semibold text-zinc-500 uppercase">Est. Time: {r.estimatedHours || r.duration}h</span>
+                            )}
+                            {r.deadline && <span className="text-[10px] font-semibold text-secondary uppercase bg-secondary/10 px-1 rounded">Dead: {r.deadline}</span>}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <button 
+                            onClick={() => handleToggleRoutineSkip(r.id)}
+                            className={`p-2 rounded border transition-colors ${isSkipped ? 'bg-zinc-800 border-zinc-700 text-zinc-400' : 'border-primary/30 text-primary hover:bg-primary/10'}`}
+                            title={isSkipped ? "Include in Schedule" : "Skip for Today"}
+                          >
+                            <span className="material-symbols-outlined text-lg">{isSkipped ? 'visibility_off' : 'visibility'}</span>
+                          </button>
+                          <button 
                             onClick={() => handleToggleRoutineComplete(r.id)}
-                            className={`p-2 rounded border transition-colors ${isCompleted ? 'bg-tertiary border-tertiary text-on-tertiary' : 'border-zinc-700 text-zinc-500 hover:text-tertiary hover:border-tertiary'}`}
+                            disabled={isSkipped}
+                            className={`p-2 rounded border transition-colors ${isCompleted ? 'bg-tertiary border-tertiary text-on-tertiary' : 'border-zinc-700 text-zinc-500 hover:text-tertiary hover:border-tertiary disabled:opacity-50'}`}
                           >
                             <span className="material-symbols-outlined text-lg">check</span>
                           </button>

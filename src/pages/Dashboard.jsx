@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase";
-import { collection, getDocs, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, setDoc, serverTimestamp, query, where } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { isBefore, startOfToday, parseISO, isValid, format } from "date-fns";
 import AppLayout from "../components/AppLayout";
@@ -11,6 +11,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     const [missedTasks, setMissedTasks] = useState([]);
+    const [todaysAgenda, setTodaysAgenda] = useState([]);
     const [todayStats, setTodayStats] = useState({ total: 0, completed: 0 });
     const [loading, setLoading] = useState(true);
     const [showMoodModal, setShowMoodModal] = useState(false);
@@ -23,33 +24,54 @@ const Dashboard = () => {
             try {
                 setLoading(true);
 
-                const snapshot = await getDocs(
-                    collection(db, "users", currentUser.uid, "schedule")
-                );
-
-                const today = startOfToday();
+                const pendingTasksSnapshot = await getDocs(query(collection(db, "users", currentUser.uid, "tasks"), where("status", "==", "pending")));
+                const todayTasksSnapshot = await getDocs(query(collection(db, "users", currentUser.uid, "tasks"), where("date", "==", todayStr)));
+                const routinesSnapshot = await getDocs(collection(db, "users", currentUser.uid, "routines"));
+                
                 let missed = [];
-                let todayTotal = 0;
-                let todayCompleted = 0;
-
-                snapshot.forEach((docSnap) => {
-                    const date = parseISO(docSnap.id);
-                    if (!isValid(date)) return;
-                    const items = docSnap.data().items || [];
-                    
-                    if (isBefore(date, today)) {
-                        const incomplete = items.filter((t) => !t.completed);
-                        missed.push(...incomplete);
-                    }
-                    
-                    // Count today's tasks
-                    if (format(date, 'yyyy-MM-dd') === todayStr) {
-                        todayTotal = items.length;
-                        todayCompleted = items.filter((t) => t.completed).length;
+                const today = startOfToday();
+                pendingTasksSnapshot.forEach(docSnap => {
+                    const taskData = docSnap.data();
+                    const date = parseISO(taskData.date);
+                    if (isValid(date) && isBefore(date, today)) {
+                        missed.push({ id: docSnap.id, ...taskData });
                     }
                 });
 
+                let todayTotal = 0;
+                let todayCompleted = 0;
+                let agenda = [];
+                todayTasksSnapshot.forEach(docSnap => {
+                    todayTotal += 1;
+                    const tData = docSnap.data();
+                    if (tData.status === 'completed') todayCompleted += 1;
+                    agenda.push({ id: docSnap.id, type: 'task', completed: tData.status === 'completed', ...tData });
+                });
+                
+                const dailyContextRef = doc(db, "users", currentUser.uid, "dailyContext", todayStr);
+                const dcSnap = await getDoc(dailyContextRef);
+                let completedRoutinesArr = [];
+                if (dcSnap.exists()) {
+                    completedRoutinesArr = dcSnap.data().completedRoutines || [];
+                }
+                
+                let rts = [];
+                routinesSnapshot.forEach(docSnap => {
+                    rts.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                todayTotal += routinesSnapshot.size;
+                todayCompleted += completedRoutinesArr.length;
+
+                rts.forEach(r => {
+                    agenda.push({ id: r.id, type: 'routine', completed: completedRoutinesArr.includes(r.id), ...r });
+                });
+
+                // Sort missed tasks by nearest date
+                missed.sort((a, b) => new Date(b.date) - new Date(a.date));
+
                 setMissedTasks(missed);
+                setTodaysAgenda(agenda);
                 setTodayStats({ total: todayTotal, completed: todayCompleted });
             } catch (err) {
                 console.error("Error fetching tasks:", err);
@@ -225,6 +247,44 @@ const Dashboard = () => {
                                                 ))}
                                             </div>
                                         </>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* Today's Agenda Section */}
+                            <section className="bg-surface-container-low rounded-2xl border border-white/5 p-7 shadow-xl">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-zinc-400">TODAY'S WORKLOAD</h3>
+                                    <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                                        {todaysAgenda.length} ITEMS
+                                    </span>
+                                </div>
+                                <div className="space-y-3 max-h-56 overflow-y-auto pr-2">
+                                    {loading ? (
+                                        <p className="text-zinc-500 text-sm">Loading...</p>
+                                    ) : todaysAgenda.length === 0 ? (
+                                        <div className="flex items-center justify-center p-6 text-center border border-dashed border-white/10 rounded-xl">
+                                            <p className="text-zinc-500 text-xs font-bold tracking-widest uppercase">No Active Agenda</p>
+                                        </div>
+                                    ) : (
+                                        todaysAgenda.map((item, i) => (
+                                            <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${item.completed ? 'bg-surface-container/50 border-white/5 opacity-50' : 'bg-surface-container-lowest border-white/10'}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-2 h-2 rounded-full ${item.type === 'routine' ? 'bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.5)]' : 'bg-secondary shadow-[0_0_8px_rgba(163,222,255,0.5)]'}`}></div>
+                                                    <div>
+                                                        <h4 className={`text-sm font-bold truncate max-w-[200px] ${item.completed ? 'text-zinc-500 line-through' : 'text-white'}`}>{item.task}</h4>
+                                                        <span className="text-[9px] text-zinc-500 uppercase tracking-widest mt-0.5 block">
+                                                            {item.type === 'routine' ? 'DAILY ROUTINE' : 'TASK'} {item.deadline ? `| DEADLINE: ${item.deadline}` : ''}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {item.completed ? (
+                                                    <span className="material-symbols-outlined text-zinc-600 text-lg">check_circle</span>
+                                                ) : (
+                                                    <span className="material-symbols-outlined text-zinc-600 text-lg">circle</span>
+                                                )}
+                                            </div>
+                                        ))
                                     )}
                                 </div>
                             </section>
